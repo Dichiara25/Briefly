@@ -25,19 +25,39 @@ interface RssRootObject {
     };
 }
 
+interface Topic {
+    title: string,
+    rssFeeds: string[]
+}
+
+const topics: Topic[] = [{
+    title: 'Cyber Security',
+    rssFeeds: [
+        'https://feeds.feedburner.com/TheHackersNews?format=xml'
+    ]
+}]
+
 exports.fetchArticles = onSchedule("0 11 * * *", async () => {
-    const rssUrl = "https://feeds.feedburner.com/TheHackersNews?format=xml"
+    topics.forEach(async (topic: Topic) => {
+        const topicName: string = topic.title;
+        const rssFeeds: string[] = topic.rssFeeds;
 
-    const articles: RssItem[] = await fetchAndParseRssFeed(rssUrl)
-    .then(items => {
-        return items;
-    }).catch(error => {
-        console.error("Error fetching and parsing RSS feed:", error);
-        return [];
-    });
+        rssFeeds.forEach(async (rssFeed: string) => {
+            const articles: RssItem[] = await fetchAndParseRssFeed(rssFeed)
+                .then(items => {
+                    return items;
+                }).catch(error => {
+                    console.error("Error fetching and parsing RSS feed:", error);
+                    return [];
+                });
 
-    articles.forEach((article: RssItem) => {
-        admin.Firestore.set(article);
+                articles.forEach((article: RssItem) => {
+                    admin
+                        .firestore()
+                        .ref(`/articles/${topicName}`)
+                        .add(article)
+                })
+        });
     })
 });
 
