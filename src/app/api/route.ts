@@ -2,6 +2,29 @@ import { parseString } from 'xml2js';
 import fetch from 'node-fetch';
 import axios from 'axios';
 import { JSDOM } from 'jsdom';
+import * as admin from 'firebase-admin';
+
+const serviceAccount = {
+  type: process.env.NEXT_PUBLIC_FIREBASE_TYPE,
+  project_id: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  private_key_id: process.env.NEXT_PUBLIC_FIREBASE_PRIVATE_KEY_ID,
+  private_key: (process.env.NEXT_PUBLIC_FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+  client_email: process.env.NEXT_PUBLIC_FIREBASE_CLIENT_EMAIL,
+  client_id: process.env.NEXT_PUBLIC_FIREBASE_CLIENT_ID,
+  auth_uri: process.env.NEXT_PUBLIC_FIREBASE_AUTH_URI,
+  token_uri: process.env.NEXT_PUBLIC_FIREBASE_TOKEN_URI,
+  auth_provider_x509_cert_url: process.env.NEXT_PUBLIC_FIREBASE_AUTH_PROVIDER_X509_CERT_URL,
+  client_x509_cert_url: process.env.NEXT_PUBLIC_FIREBASE_CLIENT_X509_CERT_URL,
+};
+
+if (admin.apps.length === 0) {
+  admin.initializeApp({
+    // @ts-ignore
+    credential: admin.credential.cert(serviceAccount)
+  });
+  }
+
+const firestore = admin.firestore();
 
 interface RssItem {
   title: string;
@@ -21,19 +44,47 @@ interface RssRootObject {
   };
 }
 
+export async function GET(req: any) {
+  const authHeader = req.headers['authorization'];
+  const apiKeyValid = await isApiKeyValid(authHeader);
 
-export async function GET() {
-  const rssUrl = "https://feeds.feedburner.com/TheHackersNews?format=xml"
+  // Check if the Authorization header exists and matches the valid key
+  if (apiKeyValid) {
+    const collection = firestore.collection("articles");
+    const rssUrl = "https://feeds.feedburner.com/TheHackersNews?format=xml"
 
-  const articles = await fetchAndParseRssFeed(rssUrl)
-    .then(items => {
-      return items;
-    }).catch(error => {
-        console.error("Error fetching and parsing RSS feed:", error);
-        return [];
+    const articles = await fetchAndParseRssFeed(rssUrl)
+      .then(items => {
+        return items;
+      }).catch(error => {
+          console.error("Error fetching and parsing RSS feed:", error);
+          return [];
+      });
+    articles.forEach((article) => collection.add(article));
+    return Response.json({ status: 200 });
+  } else {
+    return Response.json({ status: 403 });
+  }
+}
+
+async function isApiKeyValid(authHeader: string): Promise<boolean> {
+  let isValid = false;
+  const apiKeysDocuments = await firestore.collection("apiKeys").get();
+
+  if (!apiKeysDocuments.empty) {
+    apiKeysDocuments.forEach((doc) => {
+      if (doc.exists) {
+        const data = doc.data();
+        const apiKey = data.value;
+
+        if (authHeader && authHeader === `Bearer ${apiKey}`) {
+          isValid = true;
+        }
+      }
     });
+  };
 
-  return Response.json({ rssFeed: articles });
+  return isValid;
 }
 
 async function parseHTMLFromURL(url: string): Promise<string[]> {
@@ -54,7 +105,6 @@ async function parseHTMLFromURL(url: string): Promise<string[]> {
 
   return content;
 }
-
 
 // Function to fetch and parse XML to JSON
 async function fetchAndParseRssFeed(url: string): Promise<RssItem[]> {
@@ -86,7 +136,7 @@ async function fetchAndParseRssFeed(url: string): Promise<RssItem[]> {
                         link: item.link[0],
                         description: item.description[0],
                         pubDate: item.pubDate ? item.pubDate[0] : undefined,
-                        content: content.join(' ')
+                        // content: content.join(' ')
                     });
                 }
               }
