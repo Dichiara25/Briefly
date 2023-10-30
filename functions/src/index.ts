@@ -1,15 +1,16 @@
 import { parseString } from 'xml2js';
 import fetch from 'node-fetch';
-
-// The Cloud Functions for Firebase SDK to set up triggers and logging.
+import * as admin from 'firebase-admin';
 const {onSchedule} = require("firebase-functions/v2/scheduler");
+// import axios from 'axios';
+// import { JSDOM } from 'jsdom';
 
 // The Firebase Admin SDK to interact with the Firestore database.
-const admin = require("firebase-admin");
 admin.initializeApp();
 
 interface RssItem {
     title: string;
+    content: string | null;
     link: string;
     description: string;
     pubDate?: string;
@@ -38,9 +39,12 @@ const topics: Topic[] = [{
 }]
 
 exports.fetchArticles = onSchedule("0 11 * * *", async () => {
+    const firestore = admin.firestore();
+
     topics.forEach(async (topic: Topic) => {
         const topicName: string = topic.title;
         const rssFeeds: string[] = topic.rssFeeds;
+        const collection = firestore.collection("topics").doc(topicName).collection("articles");
 
         rssFeeds.forEach(async (rssFeed: string) => {
             const articles: RssItem[] = await fetchAndParseRssFeed(rssFeed)
@@ -51,15 +55,32 @@ exports.fetchArticles = onSchedule("0 11 * * *", async () => {
                     return [];
                 });
 
-                articles.forEach((article: RssItem) => {
-                    admin
-                        .firestore()
-                        .ref(`/articles/${topicName}`)
-                        .add(article)
-                })
+            articles.forEach(async (article: RssItem) => {
+                await collection.add(article);
+            })
         });
     })
 });
+
+// async function parseHTMLFromURL(url: string): Promise<string[]> {
+//     // Fetch the content from the given URL
+//     const response = await axios.get(url);
+
+//     // Use JSDOM to parse the HTML content
+//     const dom = new JSDOM(response.data);
+
+//     // Query for all <p> elements
+//     const paragraphs = dom.window.document.querySelectorAll('p');
+
+//     // Extract text from each <p> element
+//     const content: string[] = [];
+//     paragraphs.forEach(p => {
+//       content.push(p.textContent || "");
+//     });
+
+//     return content;
+//   }
+
 
 // Function to fetch and parse XML to JSON
 async function fetchAndParseRssFeed(url: string): Promise<RssItem[]> {
@@ -70,39 +91,37 @@ async function fetchAndParseRssFeed(url: string): Promise<RssItem[]> {
 
     const xml = await response.text();
 
-    return new Promise((resolve, reject) => {
-        parseString(xml, (error: any, result: RssRootObject) => {
+    return new Promise(async (resolve, reject) => {
+        parseString(xml, async (error: any, result: RssRootObject) => {
             if (error) {
                 reject(error);
             } else {
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
 
-                const yesterday = new Date(today);
-                yesterday.setDate(today.getDate() - 1);
-
                 const items = result.rss.channel[0].item;
                 let jsonItems: RssItem[] = [];
 
-                if (items !== undefined) {
-                  jsonItems = items
-                    .filter(item => {
-                      const pubDate = item.pubDate![0];
-                      const itemDate = new Date(pubDate);
-                      return itemDate >= yesterday;
-                    })
-                    .map(item => {
-                      return {
-                          title: item.title[0],
-                          link: item.link[0],
-                          description: item.description[0],
-                          pubDate: item.pubDate ? item.pubDate[0] : undefined
-                      };
-                  });
+                for (const item of items) {
+                  const itemDate = new Date(item.pubDate![0]);
+                  if (itemDate >= today) {
+                        // console.log(`Scraping content from article "${item.title}"...`);
+                        // const content = await parseHTMLFromURL(item.link[0]);
+                        // console.log(`Scraped content: "${content}"...`);
+
+                        jsonItems.push({
+                            title: item.title[0],
+                            link: item.link[0],
+                            description: item.description[0],
+                            pubDate: item.pubDate ? item.pubDate[0] : undefined,
+                            // content: content.join(' ')
+                            content: ""
+                        });
+                  }
                 }
 
                 resolve(jsonItems);
             }
         });
     });
-  }
+}
