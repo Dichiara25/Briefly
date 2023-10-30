@@ -44,12 +44,11 @@ interface RssRootObject {
   };
 }
 
-export async function GET(req: any) {
-  const authHeader = req.headers['authorization'];
-  const apiKeyValid = await isApiKeyValid(authHeader);
+export async function GET(req: Request) {
+  const authHeader = req.headers.get('Authorization');
 
   // Check if the Authorization header exists and matches the valid key
-  if (apiKeyValid) {
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     const collection = firestore.collection("articles");
     const rssUrl = "https://feeds.feedburner.com/TheHackersNews?format=xml"
 
@@ -61,30 +60,10 @@ export async function GET(req: any) {
           return [];
       });
     articles.forEach((article) => collection.add(article));
-    return Response.json({ status: 200 });
+    return Response.json({ responseCode: 200, status: "🎉 Success" });
   } else {
-    return Response.json({ status: 403 });
+    return Response.json({ responseCode: 401, status: "🚫 Unauthorized" });
   }
-}
-
-async function isApiKeyValid(authHeader: string): Promise<boolean> {
-  let isValid = false;
-  const apiKeysDocuments = await firestore.collection("apiKeys").get();
-
-  if (!apiKeysDocuments.empty) {
-    apiKeysDocuments.forEach((doc) => {
-      if (doc.exists) {
-        const data = doc.data();
-        const apiKey = data.value;
-
-        if (authHeader && authHeader === `Bearer ${apiKey}`) {
-          isValid = true;
-        }
-      }
-    });
-  };
-
-  return isValid;
 }
 
 async function parseHTMLFromURL(url: string): Promise<string[]> {
