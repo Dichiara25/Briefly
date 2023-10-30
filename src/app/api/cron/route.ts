@@ -48,7 +48,7 @@ export async function GET(req: Request) {
   const authHeader = req.headers.get('Authorization');
 
   // Check if the Authorization header exists and matches the valid key
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (authHeader === `Bearer ${process.env.CRON_SECRET}`) {
     const collection = firestore.collection("articles");
     const rssUrl = "https://feeds.feedburner.com/TheHackersNews?format=xml"
 
