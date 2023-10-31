@@ -48,7 +48,8 @@ interface RssRootObject {
 
 interface Topic {
   name: string,
-  feeds: string[]
+  feeds: string[],
+  subscribers: number
 }
 
 export async function GET(req: Request) {
@@ -76,10 +77,12 @@ async function fetchTopics(): Promise<Topic[]> {
   if (!topicsDocuments.empty){
     topicsDocuments.forEach((topicDocument) => {
       if (topicDocument.exists) {
-        const topicData = topicDocument.data();
+        const topicData = topicDocument.data() as Topic;
         const topicName: string = topicData.name;
         const topicFeeds: string[] = topicData.feeds;
-        const topic: Topic = {name: topicName, feeds: topicFeeds};
+        const subscribers: number = topicData.subscribers;
+
+        const topic: Topic = {name: topicName, feeds: topicFeeds, subscribers: subscribers};
         topics.push(topic);
       }
     })
