@@ -73,13 +73,13 @@ export async function GET(req: Request) {
               return [];
           });
 
-          articles.forEach((article) => collection.add(article));
+        articles.forEach((article) => collection.add(article));
       });
     })
 
-    return Response.json({ responseCode: 200, status: "🎉 Success" });
+    return Response.json({ status: 200, message: "🎉 Success" });
   } else {
-    return Response.json({ responseCode: 401, status: "🚫 Unauthorized" });
+    return Response.json({ status: 401, message: "🚫 Unauthorized" });
   }
 }
 
@@ -132,7 +132,7 @@ async function fetchAndParseRssFeed(url: string): Promise<RssItem[]> {
                         link: item.link[0],
                         description: item.description[0],
                         pubDate: item.pubDate ? item.pubDate[0] : undefined,
-                        // content: content.join(' ')
+                        content: content.join(' ')
                     });
                 }
               }
