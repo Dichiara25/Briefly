@@ -44,22 +44,39 @@ interface RssRootObject {
   };
 }
 
+interface Topic {
+  name: string,
+  feeds: string[]
+}
+
+const topics: Topic[] = [{
+  name: "Cyber security",
+  feeds: ["https://feeds.feedburner.com/TheHackersNews?format=xml"]
+}]
+
 export async function GET(req: Request) {
   const authHeader = req.headers.get('Authorization');
 
   // Check if the Authorization header exists and matches the valid key
   if (authHeader === `Bearer ${process.env.CRON_SECRET}`) {
     const collection = firestore.collection("articles");
-    const rssUrl = "https://feeds.feedburner.com/TheHackersNews?format=xml"
 
-    const articles = await fetchAndParseRssFeed(rssUrl)
-      .then(items => {
-        return items;
-      }).catch(error => {
-          console.error("Error fetching and parsing RSS feed:", error);
-          return [];
+    topics.forEach(async (topic) => {
+      const feeds = topic.feeds;
+
+      feeds.forEach(async (feed) => {
+        const articles = await fetchAndParseRssFeed(feed)
+          .then(items => {
+            return items;
+          }).catch(error => {
+              console.error("Error fetching and parsing RSS feed:", error);
+              return [];
+          });
+
+          articles.forEach((article) => collection.add(article));
       });
-    articles.forEach((article) => collection.add(article));
+    })
+
     return Response.json({ responseCode: 200, status: "🎉 Success" });
   } else {
     return Response.json({ responseCode: 401, status: "🚫 Unauthorized" });
