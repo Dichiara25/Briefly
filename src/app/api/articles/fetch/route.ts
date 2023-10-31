@@ -4,6 +4,8 @@ import axios from 'axios';
 import { JSDOM } from 'jsdom';
 import * as admin from 'firebase-admin';
 
+const https = require('https');
+
 const serviceAccount = {
   type: process.env.NEXT_PUBLIC_FIREBASE_TYPE,
   project_id: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
@@ -49,38 +51,58 @@ interface Topic {
   feeds: string[]
 }
 
-const topics: Topic[] = [{
-  name: "Cyber security",
-  feeds: ["https://security.vtc.vn/rss.xml"]
-}]
-
 export async function GET(req: Request) {
   const authHeader = req.headers.get('Authorization');
 
   // Check if the Authorization header exists and matches the valid key
   if (authHeader === `Bearer ${process.env.CRON_SECRET}`) {
-    const collection = firestore.collection("articles");
+    const topics: Topic[] = await fetchTopics();
+    const articlesCollection = firestore.collection("articles");
+    const articles = await fetchArticles(topics);
 
-    topics.forEach(async (topic) => {
-      const feeds = topic.feeds;
-
-      feeds.forEach(async (feed) => {
-        const articles = await fetchAndParseRssFeed(feed)
-          .then(items => {
-            return items;
-          }).catch(error => {
-              console.error("Error fetching and parsing RSS feed:", error);
-              return [];
-          });
-
-        articles.forEach((article) => collection.add(article));
-      });
-    })
+    articles.forEach((article) => articlesCollection.add(article));
 
     return Response.json({ status: 200, message: "🎉 Success" });
   } else {
     return Response.json({ status: 401, message: "🚫 Unauthorized" });
   }
+}
+
+async function fetchTopics(): Promise<Topic[]> {
+  const topics: Topic[] = [];
+  const topicsCollection = firestore.collection("topics");
+  const topicsDocuments = await topicsCollection.get();
+
+  if (!topicsDocuments.empty){
+    topicsDocuments.forEach((topicDocument) => {
+      if (topicDocument.exists) {
+        const topicData = topicDocument.data();
+        const topicName: string = topicData.name;
+        const topicFeeds: string[] = topicData.feeds;
+        const topic: Topic = {name: topicName, feeds: topicFeeds};
+        topics.push(topic);
+      }
+    })
+  }
+
+  return topics;
+}
+
+async function fetchArticles(topics: Topic[]): Promise<RssItem[]> {
+  const articles: RssItem[] = [];
+
+  const topicPromises = topics.map(async (topic) => {
+    const feedPromises = topic.feeds.map(async (feed) => {
+      const feedArticles: RssItem[] = await fetchAndParseRssFeed(feed);
+      feedArticles.forEach((article) => articles.push(article));
+    });
+
+    await Promise.all(feedPromises);
+  });
+
+  await Promise.all(topicPromises);
+
+  return articles;
 }
 
 async function parseHTMLFromURL(url: string): Promise<string[]> {
@@ -104,7 +126,15 @@ async function parseHTMLFromURL(url: string): Promise<string[]> {
 
 // Function to fetch and parse XML to JSON
 async function fetchAndParseRssFeed(url: string): Promise<RssItem[]> {
-  const response = await fetch(url);
+  const httpsAgent = new https.Agent({
+    rejectUnauthorized: false,
+  });
+
+  const response = await fetch(url, {
+    method: 'GET',
+    agent: httpsAgent,
+  });
+
   if (!response.ok) {
       throw new Error(`Failed to fetch RSS feed from ${url}`);
   }
