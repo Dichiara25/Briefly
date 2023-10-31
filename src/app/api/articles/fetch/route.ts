@@ -61,21 +61,31 @@ export async function GET(req: Request) {
   if (authHeader === `Bearer ${process.env.CRON_SECRET}`) {
     const collection = firestore.collection("articles");
 
-    topics.forEach(async (topic) => {
-      const feeds = topic.feeds;
+    // topics.forEach(async (topic) => {
+    //   const feeds = topic.feeds;
 
-      feeds.forEach(async (feed) => {
-        const articles = await fetchAndParseRssFeed(feed)
-          .then(items => {
-            return items;
-          }).catch(error => {
-              console.error("Error fetching and parsing RSS feed:", error);
-              return [];
-          });
+    //   feeds.forEach(async (feed) => {
+    //     const articles = await fetchAndParseRssFeed(feed)
+    //       .then(items => {
+    //         return items;
+    //       }).catch(error => {
+    //           console.error("Error fetching and parsing RSS feed:", error);
+    //           return [];
+    //       });
 
-        articles.forEach((article) => collection.add(article));
+    //     articles.forEach((article) => collection.add(article));
+    //   });
+    // })
+
+    const articles = await fetchAndParseRssFeed(topics[0].feeds[0])
+      .then(items => {
+        return items;
+      }).catch(error => {
+          console.error("Error fetching and parsing RSS feed:", error);
+          return [];
       });
-    })
+
+    articles.forEach((article) => collection.add(article));
 
     return Response.json({ status: 200, message: "🎉 Success" });
   } else {
