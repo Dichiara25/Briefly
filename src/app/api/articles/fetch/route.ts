@@ -56,17 +56,7 @@ async function fetchTopics(): Promise<Topic[]> {
 
 async function fetchArticles(topics: Topic[]): Promise<Article[]> {
   const articles: Article[] = [];
-  const storedArticlesNames: string[] = [];
-  const storedArticles = await firestore.collection("articles").get();
-
-  if (!storedArticles.empty) {
-    storedArticles.forEach((storedArticle) => {
-      if (storedArticle.exists) {
-        const storedArticleData = storedArticle.data() as Article;
-        storedArticlesNames.push(storedArticleData.title);
-      }
-    })
-  }
+  const storedArticlesTitles: string[] = await fetchStoredArticlesTitles();
 
   const topicPromises = topics.map(async (topic: Topic) => {
     const topicId = topic.id as string;
@@ -74,7 +64,7 @@ async function fetchArticles(topics: Topic[]): Promise<Article[]> {
     const feedPromises = topic.feeds.map(async (feed) => {
       const feedArticles: Article[] = await fetchAndParseRssFeed(feed, topicId);
       feedArticles.forEach((article) => {
-        if (!storedArticlesNames.includes(article.title)) {
+        if (!isDuplicate(storedArticlesTitles, article.title)) {
           articles.push(article);
         }
       });
@@ -86,6 +76,26 @@ async function fetchArticles(topics: Topic[]): Promise<Article[]> {
   await Promise.all(topicPromises);
 
   return articles;
+}
+
+async function isDuplicate(storedArticlesTitles: string[], newArticleTitle: string) {
+  return storedArticlesTitles.includes(newArticleTitle)
+}
+
+async function fetchStoredArticlesTitles(): Promise<string[]> {
+  const storedArticlesTitles: string[] = [];
+  const storedArticles = await firestore.collection("articles").get();
+
+  if (!storedArticles.empty) {
+    storedArticles.forEach((storedArticle) => {
+      if (storedArticle.exists) {
+        const storedArticleData = storedArticle.data() as Article;
+        storedArticlesTitles.push(storedArticleData.title);
+      }
+    })
+  }
+
+  return storedArticlesTitles;
 }
 
 async function parseHTMLFromURL(url: string): Promise<string[]> {
