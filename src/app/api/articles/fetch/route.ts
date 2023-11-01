@@ -32,6 +32,7 @@ interface RssItem {
   title: string;
   link: string;
   description: string;
+  topicId: string;
   content?: string | null;
   pubDate?: string;
 }
@@ -47,6 +48,7 @@ interface RssRootObject {
 }
 
 interface Topic {
+  id?: string,
   name: string,
   feeds: string[],
   subscribers: number
@@ -76,13 +78,21 @@ async function fetchTopics(): Promise<Topic[]> {
 
   if (!topicsDocuments.empty){
     topicsDocuments.forEach((topicDocument) => {
+      const topicId = topicDocument.id;
+
       if (topicDocument.exists) {
         const topicData = topicDocument.data() as Topic;
         const topicName: string = topicData.name;
         const topicFeeds: string[] = topicData.feeds;
         const subscribers: number = topicData.subscribers;
 
-        const topic: Topic = {name: topicName, feeds: topicFeeds, subscribers: subscribers};
+        const topic: Topic = {
+          id: topicId,
+          name: topicName,
+          feeds: topicFeeds,
+          subscribers: subscribers
+        };
+
         topics.push(topic);
       }
     })
@@ -94,9 +104,10 @@ async function fetchTopics(): Promise<Topic[]> {
 async function fetchArticles(topics: Topic[]): Promise<RssItem[]> {
   const articles: RssItem[] = [];
 
-  const topicPromises = topics.map(async (topic) => {
+  const topicPromises = topics.map(async (topic: Topic) => {
+    const topicId = topic.id as string;
     const feedPromises = topic.feeds.map(async (feed) => {
-      const feedArticles: RssItem[] = await fetchAndParseRssFeed(feed);
+      const feedArticles: RssItem[] = await fetchAndParseRssFeed(feed, topicId);
       feedArticles.forEach((article) => articles.push(article));
     });
 
@@ -128,7 +139,7 @@ async function parseHTMLFromURL(url: string): Promise<string[]> {
 }
 
 // Function to fetch and parse XML to JSON
-async function fetchAndParseRssFeed(url: string): Promise<RssItem[]> {
+async function fetchAndParseRssFeed(url: string, topicId: string): Promise<RssItem[]> {
   const httpsAgent = new https.Agent({
     rejectUnauthorized: false,
   });
@@ -163,6 +174,7 @@ async function fetchAndParseRssFeed(url: string): Promise<RssItem[]> {
                     jsonItems.push({
                         title: item.title[0],
                         link: item.link[0],
+                        topicId: topicId,
                         description: item.description[0],
                         pubDate: item.pubDate ? item.pubDate[0] : undefined,
                         content: content.join(' ')
