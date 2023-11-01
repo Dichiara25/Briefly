@@ -130,7 +130,7 @@ async function fetchAndParseRssFeed(url: string, topicId: string): Promise<Artic
                         link: item.link[0],
                         topicId: topicId,
                         description: item.description[0],
-                        pubDate: item.pubDate ? item.pubDate[0] : undefined,
+                        pubDate: item.pubDate[0],
                         content: content.join(' ')
                     });
                 }

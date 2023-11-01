@@ -4,7 +4,7 @@ export interface Article {
     description: string;
     topicId: string;
     content?: string | null;
-    pubDate?: string;
+    pubDate: string;
   }
 
 export interface RssChannel {

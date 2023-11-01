@@ -2,5 +2,10 @@
     "crons": [{
         "path": "/api/articles/fetch",
         "schedule": "35 10 * * *"
-    }]
+    },
+    {
+        "path": "/api/articles/clean",
+        "schedule": "0 0 * * *"
+    }
+]
 }
