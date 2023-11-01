@@ -2,31 +2,9 @@ import { parseString } from 'xml2js';
 import fetch from 'node-fetch';
 import axios from 'axios';
 import { JSDOM } from 'jsdom';
-import * as admin from 'firebase-admin';
+import { firestore } from '../../../../../lib/firebase';
 
 const https = require('https');
-
-const serviceAccount = {
-  type: process.env.NEXT_PUBLIC_FIREBASE_TYPE,
-  project_id: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  private_key_id: process.env.NEXT_PUBLIC_FIREBASE_PRIVATE_KEY_ID,
-  private_key: (process.env.NEXT_PUBLIC_FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
-  client_email: process.env.NEXT_PUBLIC_FIREBASE_CLIENT_EMAIL,
-  client_id: process.env.NEXT_PUBLIC_FIREBASE_CLIENT_ID,
-  auth_uri: process.env.NEXT_PUBLIC_FIREBASE_AUTH_URI,
-  token_uri: process.env.NEXT_PUBLIC_FIREBASE_TOKEN_URI,
-  auth_provider_x509_cert_url: process.env.NEXT_PUBLIC_FIREBASE_AUTH_PROVIDER_X509_CERT_URL,
-  client_x509_cert_url: process.env.NEXT_PUBLIC_FIREBASE_CLIENT_X509_CERT_URL,
-};
-
-if (admin.apps.length === 0) {
-  admin.initializeApp({
-    // @ts-ignore
-    credential: admin.credential.cert(serviceAccount)
-  });
-  }
-
-const firestore = admin.firestore();
 
 interface RssItem {
   title: string;
@@ -106,6 +84,7 @@ async function fetchArticles(topics: Topic[]): Promise<RssItem[]> {
 
   const topicPromises = topics.map(async (topic: Topic) => {
     const topicId = topic.id as string;
+
     const feedPromises = topic.feeds.map(async (feed) => {
       const feedArticles: RssItem[] = await fetchAndParseRssFeed(feed, topicId);
       feedArticles.forEach((article) => articles.push(article));
