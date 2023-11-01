@@ -8,7 +8,7 @@ export interface Article {
   }
 
 export interface RssChannel {
-    article: Article[];
+    item: Article[];
 }
 
 export interface RssRootObject {

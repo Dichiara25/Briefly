@@ -117,7 +117,7 @@ async function fetchAndParseRssFeed(url: string, topicId: string): Promise<Artic
               const today = new Date();
               today.setHours(0, 0, 0, 0);
 
-              const items = result.rss.channel[0].article;
+              const items = result.rss.channel[0].item;
               let jsonItems: Article[] = [];
 
               for (const item of items) {
