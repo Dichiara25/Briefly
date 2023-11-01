@@ -3,34 +3,9 @@ import fetch from 'node-fetch';
 import axios from 'axios';
 import { JSDOM } from 'jsdom';
 import { firestore } from '../../../../../lib/firebase';
+import { Article, RssRootObject, Topic } from '../../../../../utils/articles';
 
 const https = require('https');
-
-interface RssItem {
-  title: string;
-  link: string;
-  description: string;
-  topicId: string;
-  content?: string | null;
-  pubDate?: string;
-}
-
-interface RssChannel {
-  item: RssItem[];
-}
-
-interface RssRootObject {
-  rss: {
-      channel: RssChannel[];
-  };
-}
-
-interface Topic {
-  id?: string,
-  name: string,
-  feeds: string[],
-  subscribers: number
-}
 
 export async function GET(req: Request) {
   const authHeader = req.headers.get('Authorization');
@@ -79,14 +54,14 @@ async function fetchTopics(): Promise<Topic[]> {
   return topics;
 }
 
-async function fetchArticles(topics: Topic[]): Promise<RssItem[]> {
-  const articles: RssItem[] = [];
+async function fetchArticles(topics: Topic[]): Promise<Article[]> {
+  const articles: Article[] = [];
 
   const topicPromises = topics.map(async (topic: Topic) => {
     const topicId = topic.id as string;
 
     const feedPromises = topic.feeds.map(async (feed) => {
-      const feedArticles: RssItem[] = await fetchAndParseRssFeed(feed, topicId);
+      const feedArticles: Article[] = await fetchAndParseRssFeed(feed, topicId);
       feedArticles.forEach((article) => articles.push(article));
     });
 
@@ -118,7 +93,7 @@ async function parseHTMLFromURL(url: string): Promise<string[]> {
 }
 
 // Function to fetch and parse XML to JSON
-async function fetchAndParseRssFeed(url: string, topicId: string): Promise<RssItem[]> {
+async function fetchAndParseRssFeed(url: string, topicId: string): Promise<Article[]> {
   const httpsAgent = new https.Agent({
     rejectUnauthorized: false,
   });
@@ -142,8 +117,8 @@ async function fetchAndParseRssFeed(url: string, topicId: string): Promise<RssIt
               const today = new Date();
               today.setHours(0, 0, 0, 0);
 
-              const items = result.rss.channel[0].item;
-              let jsonItems: RssItem[] = [];
+              const items = result.rss.channel[0].article;
+              let jsonItems: Article[] = [];
 
               for (const item of items) {
                 const itemDate = new Date(item.pubDate![0]);

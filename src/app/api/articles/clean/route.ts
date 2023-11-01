@@ -5,7 +5,13 @@ export async function GET(req: Request) {
 
     // Check if the Authorization header exists and matches the valid key
     if (authHeader === `Bearer ${process.env.CRON_SECRET}`) {
-      const articlesCollection = firestore.collection("articles");
+      const articles = await firestore.collection("articles").get();
+
+      articles.forEach((article) => {
+        if (article.exists) {
+            const data = article.data();
+        }
+      })
 
       return Response.json({ status: 200, message: "🎉 Success" });
     } else {
