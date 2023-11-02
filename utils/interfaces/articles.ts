@@ -1,11 +1,17 @@
 export interface Article {
     title: string;
-    link: string;
-    description: string;
     topicId: string;
-    content?: string | null;
+    link: string;
+    content: string;
     pubDate: string;
-  }
+    summary: string;
+}
+
+export interface RssObject {
+    title: string;
+    link: string;
+    pubDate: string;
+}
 
 export interface RssChannel {
     item: Article[];
