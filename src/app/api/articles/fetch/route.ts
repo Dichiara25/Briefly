@@ -3,7 +3,7 @@ import fetch from 'node-fetch';
 import axios from 'axios';
 import { JSDOM } from 'jsdom';
 import { firestore } from '../../../../../lib/firebase';
-import { Article, RssRootObject, Topic } from '../../../../../utils/articles';
+import { Article, RssObject, RssRootObject, Topic } from '../../../../../utils/interfaces/articles';
 
 const https = require('https');
 
@@ -62,18 +62,34 @@ async function fetchArticles(topics: Topic[]): Promise<Article[]> {
     const topicId = topic.id as string;
 
     const feedPromises = topic.feeds.map(async (feed) => {
-      const feedArticles: Article[] = await fetchAndParseRssFeed(feed, topicId);
-      feedArticles.forEach((article) => {
-        if (!isDuplicate(storedArticlesTitles, article.title)) {
-          articles.push(article);
-        }
+      const rssObjects: RssObject[] = await fetchAndParseRssFeed(feed, topicId);
+
+      for (const rssObject of rssObjects) {
+        const alreadyStored: boolean = await isDuplicate(storedArticlesTitles, rssObject.title);
+
+        if (!alreadyStored) {
+            const content = await parseHTMLFromURL(rssObject.link);
+
+            const article: Article = {
+              title: rssObject.title,
+              link: rssObject.link,
+              pubDate: rssObject.pubDate,
+              topicId: topicId,
+              content: content.join(" ").replace('\n', ''),
+              summary: ""
+            }
+
+            articles.push(article);
+          }
+        };
       });
-    });
 
     await Promise.all(feedPromises);
   });
 
   await Promise.all(topicPromises);
+
+  console.log(articles);
 
   return articles;
 }
@@ -118,7 +134,7 @@ async function parseHTMLFromURL(url: string): Promise<string[]> {
 }
 
 // Function to fetch and parse XML to JSON
-async function fetchAndParseRssFeed(url: string, topicId: string): Promise<Article[]> {
+async function fetchAndParseRssFeed(url: string, topicId: string): Promise<RssObject[]> {
   const httpsAgent = new https.Agent({
     rejectUnauthorized: false,
   });
@@ -143,20 +159,16 @@ async function fetchAndParseRssFeed(url: string, topicId: string): Promise<Artic
               today.setHours(0, 0, 0, 0);
 
               const items = result.rss.channel[0].item;
-              let jsonItems: Article[] = [];
+              let jsonItems: RssObject[] = [];
 
               for (const item of items) {
-                const itemDate = new Date(item.pubDate![0]);
-                if (itemDate >= today) {
-                    const content = await parseHTMLFromURL(item.link[0]);
+                const itemDate = new Date(item.pubDate[0]);
 
+                if (itemDate >= today) {
                     jsonItems.push({
                         title: item.title[0],
                         link: item.link[0],
-                        topicId: topicId,
-                        description: item.description[0],
                         pubDate: item.pubDate[0],
-                        content: content.join(' ')
                     });
                 }
               }
