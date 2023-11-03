@@ -7,7 +7,7 @@ import { Article, RssObject, RssRootObject, Topic } from '../../../../../utils/i
 
 const https = require('https');
 
-export async function GET(req: Request) {
+export async function POST(req: Request) {
   const authHeader = req.headers.get('Authorization');
 
   // Check if the Authorization header exists and matches the valid key
