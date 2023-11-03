@@ -2,7 +2,7 @@ import { firestore } from "../../../../../lib/firebase";
 import { Article } from "../../../../../utils/interfaces/articles";
 import { daysBetweenDates } from "../../../../../utils/dates";
 
-export async function POST(req: Request) {
+export async function GET(req: Request) {
     const authHeader = req.headers.get('Authorization');
 
     // Check if the Authorization header exists and matches the valid key

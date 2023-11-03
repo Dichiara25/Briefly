@@ -2,7 +2,7 @@ import axios from 'axios';
 import { firestore } from "../../../../../lib/firebase";
 import { Channel } from '../../../../../utils/interfaces/slack';
 
-export async function POST(req: Request) {
+export async function GET(req: Request) {
     const authHeader = req.headers.get('Authorization');
 
     // Check if the Authorization header exists and matches the valid key
