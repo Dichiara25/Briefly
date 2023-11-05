@@ -16,11 +16,27 @@ export async function GET(req: Request) {
     const articlesCollection = firestore.collection("articles");
     const articles = await fetchArticles(topics);
 
-    articles.forEach((article) => articlesCollection.add(article));
+    articles.forEach(async (article) => {
+      articlesCollection.add(article);
+      await sendData("http://localhost:3000/api/articles/publish", article);
+    });
 
     return Response.json({ status: 200, message: "🎉 Success" });
   } else {
     return Response.json({ status: 401, message: "🚫 Unauthorized" });
+  }
+}
+
+async function sendData(url: string, data: object): Promise<void> {
+  try {
+    const response = await axios.post(url, data,  {
+      headers: {
+        'Authorization': `Bearer ${process.env.CRON_SECRET}`
+      }
+    });
+    console.log('Data sent successfully', response.data);
+  } catch (error) {
+    console.error('Error sending data', error);
   }
 }
 
@@ -88,8 +104,6 @@ async function fetchArticles(topics: Topic[]): Promise<Article[]> {
   });
 
   await Promise.all(topicPromises);
-
-  console.log(articles);
 
   return articles;
 }
