@@ -1,11 +1,12 @@
 import { firestore } from "../../../../../lib/firebase";
 import { Channel } from '../../../../../utils/interfaces/slack';
 import { Article } from '../../../../../utils/interfaces/articles';
-import { sendMessageToSlackChannel } from "./slack";
+import { formatMessage, sendMessageToSlackChannel } from "./slack";
 
 export async function POST(req: Request) {
     const authHeader = req.headers.get('Authorization');
     const article: Article = await req.json();
+    const message = await formatMessage(article);
 
     // Check if the Authorization header exists and matches the valid key
     if (authHeader === `Bearer ${process.env.CRON_SECRET}`) {
@@ -18,7 +19,7 @@ export async function POST(req: Request) {
                     const slackChannelData = slackChannel.data() as Channel;
                     const slackChannelName = slackChannelData.name;
 
-                    await sendMessageToSlackChannel(slackOAuthToken, slackChannelName, "Hello world!");
+                    await sendMessageToSlackChannel(slackOAuthToken, slackChannelName, message);
                 }
             })
         }

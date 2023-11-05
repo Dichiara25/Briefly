@@ -16,7 +16,7 @@ export async function GET(req: Request) {
 
     articles.forEach(async (article) => {
       articlesCollection.add(article);
-      await sendData(`https://${process.env.NEXT_PUBLIC_APP_URL}/api/articles/publish`, article);
+      await sendData(`${process.env.NEXT_PUBLIC_APP_URL}/api/articles/publish`, article);
     });
 
     return Response.json({ status: 200, message: "🎉 Success" });
