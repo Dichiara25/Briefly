@@ -1,12 +1,11 @@
-import axios from 'axios';
 import { firestore } from "../../../../../lib/firebase";
 import { Channel } from '../../../../../utils/interfaces/slack';
+import { Article } from '../../../../../utils/interfaces/articles';
+import { sendMessageToSlackChannel } from "./slack";
 
 export async function POST(req: Request) {
     const authHeader = req.headers.get('Authorization');
-    const article = await req.json();
-
-    console.log(article);
+    const article: Article = await req.json();
 
     // Check if the Authorization header exists and matches the valid key
     if (authHeader === `Bearer ${process.env.CRON_SECRET}`) {
@@ -28,30 +27,4 @@ export async function POST(req: Request) {
     } else {
         return Response.json({ status: 401, message: "🚫 Unauthorized" });
     }
-}
-
-async function sendMessageToSlackChannel(token: string, channel: string, message: string): Promise<void> {
-  try {
-    const response = await axios.post(
-      'https://slack.com/api/chat.postMessage',
-      {
-        channel,
-        text: message,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-
-    if (response.data.ok) {
-      console.log('Message sent successfully.');
-    } else {
-      console.error('Failed to send message:', response.data.error);
-    }
-  } catch (error: any) {
-    console.error('Error sending message:', error.message);
-  }
 }
