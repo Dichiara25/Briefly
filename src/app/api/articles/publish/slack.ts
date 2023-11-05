@@ -33,7 +33,6 @@ export async function formatMessage(article: Article): Promise<Message[]> {
     const sentiment = ":bubble_tea: *Sentiment*\nGood news :relieved:"
     const summary = `:newspaper: *Summary*\n${article.content}`
     const link = `:link: *Link*\n<${article.link}|Full article (${article.link.split('https://')[1].split('/')[0]})>`
-    const markdownMessage = `${summary}\n\n${link}`
 
     const titleBlock: Section = {
         'type': 'header',
@@ -57,23 +56,38 @@ export async function formatMessage(article: Article): Promise<Message[]> {
         ]
     }
 
-    const messageBlock: Section = {
+    const summaryBlock: Section = {
         type: 'section',
         text: {
             'type': 'mrkdwn',
-            'text': markdownMessage
+            'text': summary
         }
     }
 
-    const dividerBlock: Divider = {
+    const firstDividerBlock: Divider = {
         type: 'divider',
         block_id: 'divider0'
     }
 
+    const linkBlock: Section = {
+        type: 'section',
+        text: {
+            'type': 'mrkdwn',
+            'text': link
+        }
+    }
+
+    const secondDividerBlock: Divider = {
+        type: 'divider',
+        block_id: 'divider1'
+    }
+
     blocks.push(titleBlock);
     blocks.push(metadataBlock);
-    blocks.push(messageBlock);
-    blocks.push(dividerBlock);
+    blocks.push(firstDividerBlock);
+    blocks.push(summaryBlock);
+    blocks.push(secondDividerBlock);
+    blocks.push(linkBlock);
 
     return blocks;
 }
