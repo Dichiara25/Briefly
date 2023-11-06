@@ -1,29 +1,9 @@
 import axios from 'axios';
 import { Article, Topic } from '../../../../../utils/interfaces/articles';
 import { firestore } from '../../../../../lib/firebase';
+import { Divider, Section, Message } from '../../../../../utils/interfaces/slack';
 
-interface Text {
-    type: string,
-    text: string
-}
 
-interface Message {
-    type: string,
-    text?: Text,
-    fields?: Text[],
-    block_id?: string
-}
-
-interface Section {
-    type: string,
-    text?: Text,
-    fields?: Text[],
-}
-
-interface Divider {
-    type: string,
-    block_id: string
-}
 
 export async function formatMessage(article: Article): Promise<Message[]> {
     const blocks: Message[] = []

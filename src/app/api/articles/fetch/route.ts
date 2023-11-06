@@ -4,7 +4,6 @@ import { firestore } from '../../../../../lib/firebase';
 import { Topic } from '../../../../../utils/interfaces/articles';
 import { fetchArticles, fetchTopics } from './articles';
 
-
 export async function GET(req: Request) {
   const authHeader = req.headers.get('Authorization');
 
