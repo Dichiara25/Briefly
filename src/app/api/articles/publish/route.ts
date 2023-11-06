@@ -1,25 +1,27 @@
 import { firestore } from "../../../../../lib/firebase";
 import { Channel } from '../../../../../utils/interfaces/slack';
 import { Article } from '../../../../../utils/interfaces/articles';
-import { formatMessage, sendMessageToSlackChannel } from "./slack";
+import { fetchWorkspaceLanguage, formatMessage, sendMessageToSlackChannel } from "./slack";
 
 export async function POST(req: Request) {
     const authHeader = req.headers.get('Authorization');
-    const article: Article = await req.json();
-    const message = await formatMessage(article);
 
     // Check if the Authorization header exists and matches the valid key
     if (authHeader === `Bearer ${process.env.CRON_SECRET}`) {
         const slackOAuthToken = process.env.NEXT_PUBLIC_SLACK_OAUTH_TOKEN as string;
-        const slackChannels = await firestore.collection("channels").get();
+        const channels = await firestore.collection("channels").get();
 
-        if (!slackChannels.empty) {
-            slackChannels.forEach(async (slackChannel) => {
-                if (slackChannel.exists) {
-                    const slackChannelData = slackChannel.data() as Channel;
-                    const slackChannelName = slackChannelData.name;
+        if (!channels.empty) {
+            channels.forEach(async (channel) => {
+                if (channel.exists) {
+                    const channelData = channel.data() as Channel;
+                    const channelName = channelData.name;
+                    const workspaceId = channelData.workspaceId;
+                    const article: Article = await req.json();
+                    const language: string = await fetchWorkspaceLanguage(workspaceId);
+                    const message = await formatMessage(article, language);
 
-                    await sendMessageToSlackChannel(slackOAuthToken, slackChannelName, message);
+                    await sendMessageToSlackChannel(slackOAuthToken, channelName, message);
                 }
             })
         }

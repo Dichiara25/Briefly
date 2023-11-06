@@ -1,11 +1,9 @@
 import axios from 'axios';
 import { Article, Topic } from '../../../../../utils/interfaces/articles';
 import { firestore } from '../../../../../lib/firebase';
-import { Divider, Section, Message } from '../../../../../utils/interfaces/slack';
+import { Divider, Section, Message, Workspace } from '../../../../../utils/interfaces/slack';
 
-
-
-export async function formatMessage(article: Article): Promise<Message[]> {
+export async function formatMessage(article: Article, language: string): Promise<Message[]> {
     const blocks: Message[] = []
     const title = `:rolled_up_newspaper: ${article.title}`
     const topicName = await getTopicName(article.topicId)
@@ -87,6 +85,23 @@ async function getTopicName(topicId: string): Promise<string | undefined> {
     }
 
     return undefined;
+}
+
+export async function fetchWorkspaceLanguage(workspaceId: string): Promise<string> {
+    const workspaces = await firestore.collection("workspaces").get();
+
+    if (!workspaces.empty) {
+        for (const workspace of workspaces.docs) {
+            if (workspace.exists) {
+                if (workspace.id === workspaceId) {
+                    const data = workspace.data() as Workspace;
+                    return data.language;
+                }
+            }
+        }
+    }
+
+    return "English";
 }
 
 export async function sendMessageToSlackChannel(token: string, channel: string, message: Message[]): Promise<void> {
