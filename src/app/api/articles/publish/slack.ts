@@ -78,8 +78,7 @@ async function getTopicName(topicId: string): Promise<string | undefined> {
     if (!topics.empty) {
         for (const topic of topics.docs) {
             if (topic.exists) {
-                console.log(topic.id === topicId);
-                if (topic.id.toString().trim() === topicId.toString().trim()) {
+                if (topic.id === topicId) {
                     const data = topic.data() as Topic;
                     return data.name;
                 }
