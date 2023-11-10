@@ -126,7 +126,6 @@ export async function sendMessageToSlackChannel(token: string, channel: string, 
       if (response.data.ok) {
         console.log('Message sent successfully.');
       } else {
-        console.log("Key:", token)
         console.error('Failed to send message:', response.data.error);
       }
     } catch (error: any) {
