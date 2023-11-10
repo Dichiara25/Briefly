@@ -1,7 +1,7 @@
 import { firestore } from "../../../../../lib/firebase";
 import { Channel } from '../../../../../utils/interfaces/slack';
 import { Article } from '../../../../../utils/interfaces/articles';
-import { fetchWorkspaceLanguage, formatMessage, sendMessageToSlackChannel } from "./slack";
+import { getWorkspaceLanguage, formatMessage, sendMessageToSlackChannel } from "./slack";
 
 export async function POST(req: Request) {
     const authHeader = req.headers.get('Authorization');
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
                     const channelName = channelData.name;
                     const workspaceId = channelData.workspaceId;
                     const article: Article = await req.json();
-                    const language: string = await fetchWorkspaceLanguage(workspaceId);
+                    const language: string = await getWorkspaceLanguage(workspaceId);
                     const message = await formatMessage(article, language);
 
                     await sendMessageToSlackChannel(slackOAuthToken, channelName, message);

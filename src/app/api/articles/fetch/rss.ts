@@ -29,7 +29,6 @@ export async function fetchAndParseRssFeed(url: string, topicId: string): Promis
             } else {
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
-
                 const items = result.rss.channel[0].item;
                 let jsonItems: RssObject[] = [];
 

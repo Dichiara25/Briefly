@@ -9,7 +9,7 @@ export async function formatMessage(article: Article, language: string): Promise
     const topicName = await getTopicName(article.topicId)
     const topic = `:tropical_drink: *Topic*\n${topicName !== undefined ? topicName : article.topicId}`
     const sentiment = ":bubble_tea: *Sentiment*\nGood news :relieved:"
-    const summary = `:newspaper: *Summary*\n${article.content}`
+    const summary = `:newspaper: *Summary*\n${article.content.slice(0, 300)}...`
     const link = `:link: *Link*\n<${article.link}|Full article (${article.link.split('https://')[1].split('/')[0]})>`
 
     const titleBlock: Section = {
@@ -87,7 +87,7 @@ async function getTopicName(topicId: string): Promise<string | undefined> {
     return undefined;
 }
 
-export async function fetchWorkspaceLanguage(workspaceId: string): Promise<string> {
+export async function getWorkspaceLanguage(workspaceId: string): Promise<string> {
     const workspaces = await firestore.collection("workspaces").get();
 
     if (!workspaces.empty) {
