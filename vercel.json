@@ -1,7 +1,7 @@
 {
     "crons": [{
         "path": "/api/articles/fetch",
-        "schedule": "35 10 * * *"
+        "schedule": "0 */1 * * *"
     },
     {
         "path": "/api/articles/clean",
