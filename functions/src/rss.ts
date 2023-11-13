@@ -1,9 +1,41 @@
-
+import axios from 'axios';
+import cheerio from 'cheerio';
 import { parseString } from 'xml2js';
 import fetch from 'node-fetch';
-import { RssObject, RssRootObject } from '../../../../../utils/interfaces/articles';
 
 const https = require('https');
+
+export interface Article {
+    title: string;
+    topicId: string;
+    link: string;
+    content: string;
+    pubDate: string;
+    summary: string;
+}
+
+export interface RssObject {
+    title: string;
+    link: string;
+    pubDate: string;
+}
+
+export interface RssChannel {
+    item: Article[];
+}
+
+export interface RssRootObject {
+    rss: {
+        channel: RssChannel[];
+    };
+}
+
+export interface Topic {
+    id?: string,
+    name: string,
+    feeds: string[],
+    subscribers: number
+}
 
 // Function to fetch and parse XML to JSON
 export async function fetchAndParseRssFeed(url: string, topicId: string): Promise<RssObject[]> {
@@ -48,4 +80,23 @@ export async function fetchAndParseRssFeed(url: string, topicId: string): Promis
             }
         });
     });
-  }
+}
+
+export async function parseHTMLFromURL(url: string): Promise<string[]> {
+    // Fetch the content from the given URL
+    const response = await axios.get(url);
+
+    // Use cheerio to parse the HTML content
+    const $ = cheerio.load(response.data);
+
+    // Query for all <p> elements
+    const paragraphs = $('p');
+
+    // Extract text from each <p> element
+    const content: string[] = [];
+    paragraphs.each((_, p) => {
+      content.push($(p).text());
+    });
+
+    return content;
+}

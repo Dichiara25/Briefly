@@ -1,7 +1,54 @@
 import axios from 'axios';
-import { Article, Topic } from '../../../../../utils/interfaces/articles';
-import { firestore } from '../../../../../lib/firebase';
-import { Divider, Section, Message, Workspace } from '../../../../../utils/interfaces/slack';
+import { Timestamp } from "firebase-admin/firestore";
+import { Article, Topic } from './rss';
+import { db } from './firestore';
+
+require('dotenv').config()
+
+export interface Workspace {
+    id: string,
+    premium: boolean,
+    name: string,
+    channelIds: string[],
+    language: string,
+    freeTrialStartDate: Timestamp,
+    freeTrialEndDate: Timestamp,
+}
+
+export interface SlackChannel {
+    id: string,
+    name: string,
+    workspaceId: string,
+    language: string,
+    live: boolean,
+    keywords: string[],
+    lastDelivery: Timestamp,
+}
+
+export interface Text {
+    type: string,
+    text: string
+}
+
+export interface Message {
+    type: string,
+    text?: Text,
+    fields?: Text[],
+    block_id?: string
+}
+
+export interface Section {
+    type: string,
+    text?: Text,
+    fields?: Text[],
+}
+
+export interface Divider {
+    type: string,
+    block_id: string
+}
+
+const slackOAuthToken = process.env.SLACK_OAUTH_TOKEN as string;
 
 export async function formatMessage(article: Article, language: string): Promise<Message[]> {
     const blocks: Message[] = []
@@ -71,7 +118,7 @@ export async function formatMessage(article: Article, language: string): Promise
 }
 
 async function getTopicName(topicId: string): Promise<string | undefined> {
-    const topics = await firestore.collection("topics").get();
+    const topics = await db.collection("topics").get();
 
     if (!topics.empty) {
         for (const topic of topics.docs) {
@@ -88,7 +135,7 @@ async function getTopicName(topicId: string): Promise<string | undefined> {
 }
 
 export async function getWorkspaceLanguage(workspaceId: string): Promise<string> {
-    const workspaces = await firestore.collection("workspaces").get();
+    const workspaces = await db.collection("workspaces").get();
 
     if (!workspaces.empty) {
         for (const workspace of workspaces.docs) {
@@ -104,7 +151,8 @@ export async function getWorkspaceLanguage(workspaceId: string): Promise<string>
     return "English";
 }
 
-export async function sendMessageToSlackChannel(token: string, channel: string, message: Message[]): Promise<void> {
+export async function sendMessageToSlackChannel(channel: string, message: Message[]): Promise<void> {
+
     try {
       const response = await axios.post(
         'https://slack.com/api/chat.postMessage',
@@ -117,7 +165,7 @@ export async function sendMessageToSlackChannel(token: string, channel: string, 
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${slackOAuthToken}`,
             'Content-Type': 'application/json',
           },
         }
