@@ -6,18 +6,22 @@ import { db } from './firestore';
 import { SlackChannel, formatMessage, getWorkspaceLanguage, sendMessageToSlackChannel } from "./slack";
 import { daysBetweenDates } from "./dates";
 
-exports.fetchNewArticles = onSchedule("0 11 * * *", async () => {
+exports.fetchNewArticles = onSchedule("31 9 * * *", async () => {
     const topics: Topic[] = await fetchTopics();
-    const articlesCollection = db.collection("articles");
+    const storedArticlesCollection = db.collection("articles");
 
-    const articles = await fetchArticles(topics);
-    console.log(articles);
-    articles.forEach(async (article) => {
-        articlesCollection.add(article);
+    console.log("Fetching articles...");
+
+    const newArticles = await fetchArticles(topics);
+
+    console.log("New articles: ", newArticles);
+
+    newArticles.forEach(async (article: Article) => {
+        storedArticlesCollection.add(article);
     });
 });
 
-exports.deleteOldArticles = onSchedule("0 * * * *", async () => {
+exports.deleteOldArticles = onSchedule("0 0 * * *", async () => {
     const articles = await db.collection("articles").get();
     const today = new Date();
 
