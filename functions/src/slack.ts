@@ -52,18 +52,22 @@ const slackOAuthToken = process.env.SLACK_OAUTH_TOKEN as string;
 
 export async function formatMessage(article: Article, language: string): Promise<Message[]> {
     const blocks: Message[] = []
+    const maxTitleLength = 150;
+    const maxSummaryLength = 300;
+    const maxSentimentLength = 50;
+
     const title = `:rolled_up_newspaper: ${article.title}`
     const topicName = await getTopicName(article.topicId)
     const topic = `:tropical_drink: *Topic*\n${topicName !== undefined ? topicName : article.topicId}`
     const sentiment = ":bubble_tea: *Sentiment*\nGood news :relieved:"
-    const summary = `:newspaper: *Summary*\n${article.content.slice(0, 300)}...`
+    const summary = `:newspaper: *Summary*\n${article.content}...`
     const link = `:link: *Link*\n<${article.link}|Full article (${article.link.split('https://')[1].split('/')[0]})>`
 
     const titleBlock: Section = {
         'type': 'header',
         'text': {
             'type': 'plain_text',
-            'text': title,
+            'text': `${title.slice(0, maxTitleLength)}${title.length > maxTitleLength ? "..." : ""}`,
         }
     }
 
@@ -76,7 +80,7 @@ export async function formatMessage(article: Article, language: string): Promise
             },
             {
                 type: 'mrkdwn',
-                text: sentiment
+                text: `${sentiment.slice(0, maxSentimentLength)}${sentiment.length > maxSentimentLength ? "..." : ""}`
             }
         ]
     }
@@ -85,7 +89,7 @@ export async function formatMessage(article: Article, language: string): Promise
         type: 'section',
         text: {
             'type': 'mrkdwn',
-            'text': summary
+            'text': `${summary.slice(0, maxSentimentLength)}${summary.length > maxSentimentLength ? "..." : ""}`
         }
     }
 
