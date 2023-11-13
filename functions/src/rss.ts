@@ -105,8 +105,6 @@ export async function parseHTMLFromURL(url: string): Promise<string[]> {
 
         return content;
     } catch (error) {
-        console.error('Error occurred in parseHTMLFromURL:', error);
-
         return [];
     }
 }

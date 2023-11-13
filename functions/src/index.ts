@@ -9,12 +9,7 @@ import { daysBetweenDates } from "./dates";
 exports.fetchNewArticles = onSchedule("31 9 * * *", async () => {
     const topics: Topic[] = await fetchTopics();
     const storedArticlesCollection = db.collection("articles");
-
-    console.log("Fetching articles...");
-
     const newArticles = await fetchArticles(topics);
-
-    console.log("New articles: ", newArticles);
 
     newArticles.forEach(async (article: Article) => {
         storedArticlesCollection.add(article);
