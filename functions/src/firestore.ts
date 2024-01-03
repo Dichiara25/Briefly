@@ -1,6 +1,19 @@
 import * as admin from 'firebase-admin';
+import { Timestamp } from "firebase-admin/firestore";
+import { Topic } from './rss';
 
-require('dotenv').config()
+require('dotenv').config();
+
+export interface Workspace {
+  id: string,
+  premium: boolean,
+  name: string,
+  channelIds: string[],
+  language: string,
+  freeTrialStartDate: Timestamp,
+  freeTrialEndDate: Timestamp,
+}
+
 
 const firebaseType = process.env.SERVICE_ACCOUNT_TYPE;
 const firebaseProjectId = process.env.SERVICE_ACCOUNT_PROJECT_ID;
@@ -34,4 +47,38 @@ if (admin.apps.length === 0) {
 }
 
 export const db = admin.firestore();
+
+export async function getTopicName(topicId: string): Promise<string | undefined> {
+  const topics = await db.collection("topics").get();
+
+  if (!topics.empty) {
+      for (const topic of topics.docs) {
+          if (topic.exists) {
+              if (topic.id === topicId) {
+                  const data = topic.data() as Topic;
+                  return data.name;
+              }
+          }
+      }
+  }
+
+  return undefined;
+}
+
+export async function getWorkspaceLanguage(workspaceId: string): Promise<string> {
+  const workspaces = await db.collection("workspaces").get();
+
+  if (!workspaces.empty) {
+      for (const workspace of workspaces.docs) {
+          if (workspace.exists) {
+              if (workspace.id === workspaceId) {
+                  const data = workspace.data() as Workspace;
+                  return data.language;
+              }
+          }
+      }
+  }
+
+  return "English";
+}
 
