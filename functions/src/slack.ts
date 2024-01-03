@@ -1,11 +1,11 @@
 import axios from 'axios';
-import { Message } from './messages';
+import { Block } from './messages';
 
 require('dotenv').config();
 
 const slackOAuthToken = process.env.SLACK_OAUTH_TOKEN as string;
 
-export async function sendMessageToSlackChannel(channel: string, message: Message[]): Promise<void> {
+export async function sendMessageToSlackChannel(channel: string, blocks: Block[]): Promise<void> {
 
     try {
       const response = await axios.post(
@@ -13,7 +13,7 @@ export async function sendMessageToSlackChannel(channel: string, message: Messag
         {
           channel: channel,
           text: ":newspaper: A new brief is available",
-          blocks: message,
+          blocks: blocks,
           unfurl_links: false,
           unfurl_media: false,
         },
