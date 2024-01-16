@@ -44,6 +44,8 @@ export interface Divider {
 }
 
 function sanitizeText(text: string, maxLength: number): string {
+    if (!text) return text;
+
     const dots = "...";
     const dotsLength = dots.length;
 
