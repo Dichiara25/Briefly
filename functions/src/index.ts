@@ -2,9 +2,10 @@ const { onSchedule } = require("firebase-functions/v2/scheduler");
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { Article, Topic } from './rss';
 import { fetchArticles, fetchTopics } from './articles';
-import { db } from './firestore';
-import { SlackChannel, formatMessage, getWorkspaceLanguage, sendMessageToSlackChannel } from "./slack";
+import { db, getWorkspaceLanguage } from './firestore';
+import { sendMessageToSlackChannel } from "./slack";
 import { daysBetweenDates } from "./dates";
+import { SlackChannel, formatMessage } from "./messages";
 
 exports.fetchNewArticles = onSchedule("31 9 * * *", async () => {
     const topics: Topic[] = await fetchTopics();

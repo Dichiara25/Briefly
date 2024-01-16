@@ -107,7 +107,7 @@ async function getTopic(topicId: string): Promise<string> {
 }
 
 async function getSentiment(summary: string): Promise<string> {
-    return ":bubble_tea: *Sentiment*\nGood news :relieved:";
+    return ":cocktail: *Sentiment*\nGood news :relieved:";
 }
 
 function getLink(articleLink: string): string {
