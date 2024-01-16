@@ -13,7 +13,7 @@ exports.fetchNewArticles = onSchedule("31 9 * * *", async () => {
     const newArticles = await fetchArticles(topics);
 
     newArticles.forEach(async (article: Article) => {
-        storedArticlesCollection.add(article);
+        if (article.content) storedArticlesCollection.add(article);
     });
 });
 
