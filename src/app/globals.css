@@ -21,7 +21,7 @@ button {
   border-style: none;
   padding: 20px 40px;
   margin: 0 20px;
-  font-size: x-large;
+  font-size: large;
   font-weight: bold;
   color: white;
   background-image: linear-gradient(to right, var(--primary-color), var(--secondary-color));
@@ -35,17 +35,38 @@ button:hover {
 }
 
 a {
-  font-size: x-large;
-  margin: 0 40px;
+  font-size: large;
+  margin: 0 20px;
   transition: all .2s ease-in-out;
 }
 
 a:hover {
   cursor: pointer;
   opacity: .5;
-  transform: rotate(2deg);
 }
 
 a:visited, a:link, a:active {
   text-decoration: none;
+}
+
+h1 {
+  font-weight: bold;
+  background: -webkit-linear-gradient(var(--primary-color), var(--secondary-color));
+  background-clip: unset;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+h3 {
+  font-weight: bold;
+  background: -webkit-linear-gradient(var(--primary-color), var(--secondary-color));
+  background-clip: unset;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+hr {
+  margin: 20px 0;
+  width: 10%;
+  opacity: 0.3;
 }
