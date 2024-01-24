@@ -1,6 +1,6 @@
 export const routes = {
-    'privacy': "/legal/privacy",
-    'termsOfUse': "/legal/terms",
+    'privacy': "/privacy",
+    'termsOfUse': "/terms",
     'documentation': "/documentation",
     'pricing': "/pricing"
 }
