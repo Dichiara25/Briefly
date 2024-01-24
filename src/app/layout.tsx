@@ -13,9 +13,11 @@ const roboto = Roboto({
   subsets: ['latin'],
 })
 
-export const metadata: Metadata = {
-  title: APP_NAME,
-  description: 'Your AI-powered newsfeed in Slack',
+function AppMetadata() {
+  return <head>
+    <title>{APP_NAME}</title>
+    <meta name='description' content='Your AI-powered newsfeed in Slack' />
+  </head>
 }
 
 export default function RootLayout({
@@ -25,6 +27,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={roboto.className}>
+      <AppMetadata />
       <Toaster />
       <Header />
       <div>{children}</div>
