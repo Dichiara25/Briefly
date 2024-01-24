@@ -36,16 +36,14 @@ export default function AccessToken() {
             const responseData = response.data;
             const teamId = responseData['team']['id'];
             const existingTeamIds = await db
-              .collection('workspaces')
+              .collection('acceptedWorkspaces')
               .get()
               .then((docs) => {
                 if (!docs.empty) {
                   const array: string[] = [];
                   docs.forEach((doc) => {
                     if (doc.exists) {
-                      const workspaceData = doc.data();
-                      const workspaceId = workspaceData.id;
-                      array.push(workspaceId);
+                      array.push(doc.id);
                     }
                   });
 
@@ -54,21 +52,24 @@ export default function AccessToken() {
             })
 
             if (!existingTeamIds?.includes(teamId)) {
-              const freeTrialEndDate = getDateIn30Days();
               setToken(responseData['access_token']);
 
               const workspaceData = {
                 "id": teamId,
                 "name": responseData['team']['name'],
                 "accessToken": responseData['access_token'],
-                "premium": false,
                 "channelIds": [],
                 "language": "English",
-                "freeTrialStartDate": Timestamp.now(),
-                "freeTrialEndDate": Timestamp.fromDate(freeTrialEndDate),
               };
 
-              db.collection('workspaces').doc(teamId).set(workspaceData);
+              db
+                .collection('pendingWorkspaces')
+                .doc(teamId)
+                .set(workspaceData)
+                .then(() => {
+                  toast.success(`Successfully requested ${APP_NAME} installation 🔥`);
+                  redirect(routes.home);
+                });
             } else {
               toast(`${APP_NAME} is already installed in this workspace 😀`);
               redirect(routes.home);
