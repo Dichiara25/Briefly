@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
 import { Roboto } from 'next/font/google'
-import './globals.css'
-import Header from './components/structure/Header'
-import Footer from './components/structure/Footer'
+import {Toaster} from "react-hot-toast";
+import './globals.css';
+import Header from './components/structure/Header';
+import Footer from './components/structure/Footer';
 
 export const APP_NAME = "Briefly";
 export const DOMAIN_NAME = "briefly.rocks"
@@ -24,6 +25,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={roboto.className}>
+      <Toaster />
       <Header />
       <div>{children}</div>
       <Footer />

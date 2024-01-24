@@ -4,6 +4,8 @@ import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import styles from "../structure/Body.module.css";
 import { useEffect, useState } from 'react';
+import toast from "react-hot-toast";
+import { APP_NAME } from '@/app/layout';
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_SLACK_CLIENT_ID;
 const CLIENT_SECRET = process.env.NEXT_PUBLIC_SLACK_CLIENT_SECRET;
@@ -27,11 +29,11 @@ export default function AccessToken() {
             }
           })
           .then(response => {
-            console.log('Response:', response.data);
-            setToken(response.data['access_token'])
+            setToken(response.data['access_token']);
           })
           .catch(error => {
-            console.error('Error:', error);
+            toast.error(`An error occurred while installing ${APP_NAME} 😔`);
+            console.error('An error occurred while retrieving the access token:', error);
           });
         }
       }, [code]);
