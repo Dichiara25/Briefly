@@ -6,6 +6,7 @@ require('dotenv').config();
 
 export interface Workspace {
   id: string,
+  accessToken: string,
   premium: boolean,
   name: string,
   channelIds: string[],

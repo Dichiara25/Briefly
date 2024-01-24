@@ -6,6 +6,10 @@ import styles from "../structure/Body.module.css";
 import { useEffect, useState } from 'react';
 import toast from "react-hot-toast";
 import { APP_NAME } from '@/app/layout';
+import { firestore } from 'firebase-admin';
+import { db } from '@/app/firebase/config';
+import { Timestamp } from 'firebase/firestore';
+import { getDateIn30Days } from '@/app/utils/dates';
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_SLACK_CLIENT_ID;
 const CLIENT_SECRET = process.env.NEXT_PUBLIC_SLACK_CLIENT_SECRET;
@@ -29,7 +33,22 @@ export default function AccessToken() {
             }
           })
           .then(response => {
-            setToken(response.data['access_token']);
+            const responseData = response.data;
+            const freeTrialEndDate = getDateIn30Days();
+            setToken(responseData['access_token']);
+
+            const workspaceData = {
+              "id": responseData['team']['id'],
+              "name": responseData['team']['name'],
+              "accessToken": responseData['access_token'],
+              "premium": false,
+              "channelIds": [],
+              "language": "English",
+              "freeTrialStartDate": Timestamp.now(),
+              "freeTrialEndDate": Timestamp.fromDate(freeTrialEndDate),
+            };
+
+            db.collection('workspaces').add(workspaceData);
           })
           .catch(error => {
             toast.error(`An error occurred while installing ${APP_NAME} 😔`);
