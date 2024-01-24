@@ -1,15 +1,15 @@
 'use client'
 
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, redirect } from 'next/navigation';
 import axios from 'axios';
 import styles from "../structure/Body.module.css";
 import { useEffect, useState } from 'react';
 import toast from "react-hot-toast";
 import { APP_NAME } from '@/app/layout';
-import { firestore } from 'firebase-admin';
 import { db } from '@/app/firebase/config';
 import { Timestamp } from 'firebase/firestore';
 import { getDateIn30Days } from '@/app/utils/dates';
+import { routes } from '@/app/routes';
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_SLACK_CLIENT_ID;
 const CLIENT_SECRET = process.env.NEXT_PUBLIC_SLACK_CLIENT_SECRET;
@@ -32,23 +32,47 @@ export default function AccessToken() {
               'Content-Type': 'multipart/form-data'
             }
           })
-          .then(response => {
+          .then(async response => {
             const responseData = response.data;
-            const freeTrialEndDate = getDateIn30Days();
-            setToken(responseData['access_token']);
+            const teamId = responseData['team']['id'];
+            const existingTeamIds = await db
+              .collection('workspaces')
+              .get()
+              .then((docs) => {
+                if (!docs.empty) {
+                  const array: string[] = [];
+                  docs.forEach((doc) => {
+                    if (doc.exists) {
+                      const workspaceData = doc.data();
+                      const workspaceId = workspaceData.id;
+                      array.push(workspaceId);
+                    }
+                  });
 
-            const workspaceData = {
-              "id": responseData['team']['id'],
-              "name": responseData['team']['name'],
-              "accessToken": responseData['access_token'],
-              "premium": false,
-              "channelIds": [],
-              "language": "English",
-              "freeTrialStartDate": Timestamp.now(),
-              "freeTrialEndDate": Timestamp.fromDate(freeTrialEndDate),
-            };
+                  return array;
+                }
+            })
 
-            db.collection('workspaces').add(workspaceData);
+            if (!existingTeamIds?.includes(teamId)) {
+              const freeTrialEndDate = getDateIn30Days();
+              setToken(responseData['access_token']);
+
+              const workspaceData = {
+                "id": teamId,
+                "name": responseData['team']['name'],
+                "accessToken": responseData['access_token'],
+                "premium": false,
+                "channelIds": [],
+                "language": "English",
+                "freeTrialStartDate": Timestamp.now(),
+                "freeTrialEndDate": Timestamp.fromDate(freeTrialEndDate),
+              };
+
+              db.collection('workspaces').doc(teamId).set(workspaceData);
+            } else {
+              toast(`${APP_NAME} is already installed in this workspace 😀`);
+              redirect(routes.home);
+            }
           })
           .catch(error => {
             toast.error(`An error occurred while installing ${APP_NAME} 😔`);
