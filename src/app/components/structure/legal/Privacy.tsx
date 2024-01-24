@@ -15,7 +15,7 @@ function DataHosting() {
         <h2>Data Hosting & Security</h2>
         <div className={styles.paragraph}>
             <p>
-                <b>Data Hosting:</b> {APP_NAME}'s data is hosted in Europe on the Google Cloud Platform, utilizing Firebase services. This ensures that your data is stored securely and in compliance with relevant European data protection regulations.
+                <b>Data Hosting:</b> {APP_NAME}&apos;s data is hosted in Europe on the Google Cloud Platform, utilizing Firebase services. This ensures that your data is stored securely and in compliance with relevant European data protection regulations.
             </p>
             <p>
                 <b>Security Measures:</b> We implement a variety of security measures to maintain the safety of your personal information. However, no method of transmission over the Internet or method of electronic storage is 100% secure, so we cannot guarantee its absolute security.
@@ -31,7 +31,7 @@ function InformationCollection() {
             <p>
                 <b>Personal Information:</b> We do not collect any personal information from our users. Our service focuses on sending news to Slack organizations without requiring personal data.            </p>
             <p>
-                <b>Non-Personal Information: </b> We may collect non-personal identification information about users whenever they interact with {APP_NAME}. This may include the browser name, the type of computer, and technical information about users' means of connection to our services, such as the operating system and the Internet service providers utilized.
+                <b>Non-Personal Information: </b> We may collect non-personal identification information about users whenever they interact with {APP_NAME}. This may include the browser name, the type of computer, and technical information about users&apos; means of connection to our services, such as the operating system and the Internet service providers utilized.
             </p>
         </div>
     </div>
@@ -45,7 +45,7 @@ function UseOfInformation() {
                 <b>Service Provision:</b> The information we collect is used solely for the purpose of providing the service, which includes sending news to Slack organizations.
             </p>
             <p>
-                <b>Non-Disclosure:</b> We may collect non-personal identification information about users whenever they interact with {APP_NAME}. This may include the browser name, the type of computer, and technical information about users' means of connection to our services, such as the operating system and the Internet service providers utilized.
+                <b>Non-Disclosure:</b> We may collect non-personal identification information about users whenever they interact with {APP_NAME}. This may include the browser name, the type of computer, and technical information about users&apos; means of connection to our services, such as the operating system and the Internet service providers utilized.
             </p>
         </div>
     </div>
