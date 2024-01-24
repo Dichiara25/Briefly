@@ -1,5 +1,6 @@
 import { APP_NAME } from '@/app/layout'
 import styles from '../Body.module.css'
+import AddToSlackButton from '../../slack/AddToSlackButton'
 
 export default function Hero() {
    return (
@@ -10,9 +11,9 @@ export default function Hero() {
         <div className={styles.subtitle}>
           {APP_NAME} helps you keeping up by sending you byte-sized reports on your favorite topics.
         </div>
-        <button style={{margin: "100px 0", fontSize: "x-large"}}>
-          Add to Slack
-        </button>
+        <div style={{margin: "100px 0", fontSize: "x-large"}}>
+          <AddToSlackButton />
+        </div>
         <hr />
       </main>
    )
