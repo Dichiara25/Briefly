@@ -4,6 +4,18 @@ import { Topic } from './rss';
 
 require('dotenv').config();
 
+export interface PendingWorkspace {
+    id: string,
+    accessToken: string,
+    name: string,
+    channelIds: string[],
+    language: string,
+}
+
+export interface WorkspaceId {
+    id: string,
+}
+
 export interface Workspace {
   id: string,
   accessToken: string,
@@ -67,7 +79,7 @@ export async function getTopicName(topicId: string): Promise<string | undefined>
 }
 
 export async function getWorkspaceLanguage(workspaceId: string): Promise<string> {
-  const workspaces = await db.collection("workspaces").get();
+  const workspaces = await db.collection("acceptedWorkspaces").get();
 
   if (!workspaces.empty) {
       for (const workspace of workspaces.docs) {

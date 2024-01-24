@@ -8,7 +8,6 @@ import toast from "react-hot-toast";
 import { APP_NAME } from '@/app/layout';
 import { db } from '@/app/firebase/config';
 import { Timestamp } from 'firebase/firestore';
-import { getDateIn30Days } from '@/app/utils/dates';
 import { routes } from '@/app/routes';
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_SLACK_CLIENT_ID;
