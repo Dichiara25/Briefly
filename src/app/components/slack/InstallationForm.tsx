@@ -65,10 +65,14 @@ function TopicsSelection(props: {
 export default function InstallationForm(props: {availableTopics: string[]}) {
     const [language, setLanguage] = useState(localStorage.getItem("language") || "English");
     const [topics, setTopics] = useState<string[]>(() => {
-        // Attempt to get topics from localStorage
-        const savedTopics = localStorage.getItem('topics');
-        // If savedTopics exists and is not null, parse it, otherwise default to an empty array
-        return savedTopics ? JSON.parse(savedTopics) : [];
+            if (typeof window !== 'undefined') {
+            // Attempt to get topics from localStorage
+            const savedTopics = localStorage.getItem('topics');
+            // If savedTopics exists and is not null, parse it, otherwise default to an empty array
+            return savedTopics ? JSON.parse(savedTopics) : [];
+        } else {
+            return []
+        }
     });
 
     const removeTopic = (valueToRemove: string) => {
