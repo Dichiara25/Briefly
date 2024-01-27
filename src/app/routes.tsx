@@ -3,5 +3,6 @@ export const routes = {
     'privacy': "/privacy",
     'termsOfUse': "/terms",
     'documentation': "/documentation",
-    'pricing': "/pricing"
+    'pricing': "/pricing",
+    'oauth2': "/oauth2"
 }
