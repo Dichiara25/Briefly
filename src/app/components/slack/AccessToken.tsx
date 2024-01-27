@@ -13,6 +13,20 @@ import { routes } from '@/app/routes';
 const CLIENT_ID = process.env.NEXT_PUBLIC_SLACK_CLIENT_ID;
 const CLIENT_SECRET = process.env.NEXT_PUBLIC_SLACK_CLIENT_SECRET;
 
+export interface Channel {
+  id: string,
+  name: string,
+  topicIds: string[]
+}
+
+export interface PendingWorkspace {
+  id: string,
+  accessToken: string,
+  name: string,
+  channels: Channel[],
+  language: string,
+}
+
 export default function AccessToken() {
     const searchParams = useSearchParams();
     const code = searchParams.get("code");
@@ -34,7 +48,7 @@ export default function AccessToken() {
           .then(async response => {
             const responseData = response.data;
             const teamId = responseData['team']['id'];
-            const existingTeamIds = await db
+            const existingWorkspaceIds = await db
               .collection('acceptedWorkspaces')
               .get()
               .then((docs) => {
@@ -50,14 +64,20 @@ export default function AccessToken() {
                 }
             })
 
-            if (!existingTeamIds?.includes(teamId)) {
+            if (!existingWorkspaceIds?.includes(teamId)) {
               setToken(responseData['access_token']);
 
-              const workspaceData = {
+              const workspaceData: PendingWorkspace = {
                 "id": teamId,
                 "name": responseData['team']['name'],
                 "accessToken": responseData['access_token'],
-                "channelIds": [],
+                "channels": [
+                  {
+                    id: "",
+                    name: "",
+                    topicIds: [],
+                  }
+                ],
                 "language": "English",
               };
 

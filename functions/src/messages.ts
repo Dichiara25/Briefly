@@ -1,4 +1,3 @@
-import { Timestamp } from "firebase-admin/firestore";
 import { Article } from './rss';
 import { getTopicName } from './firestore';
 

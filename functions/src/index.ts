@@ -53,9 +53,11 @@ exports.publishNewArticles = onDocumentCreated("articles/{docId}", async (event)
                 const workspaceData = workspace.data() as AcceptedWorkspace;
                 const workspaceToken = workspaceData.accessToken;
                 const workspaceLanguage = workspaceData.language;
-                const channels = workspaceData.channels;
+                const workspaceChannels: Channel[] = workspaceData.channels;
 
-                channels.forEach(async (channel: Channel) => {
+                console.log(`Workspace language: ${workspaceLanguage}`);
+
+                workspaceChannels.forEach(async (channel: Channel) => {
                     if (channel.topicIds.includes(article.topicId)) {
                         const channelName = channel.name;
                         const message = await formatMessage(article, workspaceLanguage);
