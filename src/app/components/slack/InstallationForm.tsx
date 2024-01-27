@@ -118,7 +118,10 @@ export default function InstallationForm(props: {availableTopics: string[]}) {
             {topics.length > 0 &&
                 <div>
                     {topics.map((topic) => (
-                        <div style={{display: "flex", alignItems: "center", margin: "20px 0",}}>
+                        <div
+                            key={topic}
+                            style={{display: "flex", alignItems: "center", margin: "20px 0"}}
+                        >
                             <button
                                 onClick={(e) => {
                                     e.preventDefault();
