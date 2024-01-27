@@ -86,7 +86,7 @@ export default function AccessToken() {
                 .doc(teamId)
                 .set(workspaceData)
                 .then(() => {
-                  toast.success(`Successfully requested ${APP_NAME} installation 🔥`);
+                  toast.success(`Success`);
                   redirect(routes.home);
                 });
             } else {
@@ -103,8 +103,8 @@ export default function AccessToken() {
 
     return (
         <div className={styles.main}>
-            <h1>Access token</h1>
-            <p>{token ? `The access token is: ${token}` : 'No access token yet!'}</p>
+            <h1>Thanks for installing {APP_NAME} 🔥</h1>
+            <p>{token ? 'You are going to be redirected...' : 'Please wait...'}</p>
         </div>
     );
 }
