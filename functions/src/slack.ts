@@ -1,11 +1,7 @@
 import axios from 'axios';
 import { Block } from './messages';
 
-require('dotenv').config();
-
-const slackOAuthToken = process.env.SLACK_OAUTH_TOKEN as string;
-
-export async function sendMessageToSlackChannel(channel: string, blocks: Block[]): Promise<void> {
+export async function sendMessageToSlackChannel(accessToken: string, channel: string, blocks: Block[]): Promise<void> {
 
     try {
       const response = await axios.post(
@@ -19,7 +15,7 @@ export async function sendMessageToSlackChannel(channel: string, blocks: Block[]
         },
         {
           headers: {
-            Authorization: `Bearer ${slackOAuthToken}`,
+            Authorization: `Bearer ${accessToken}`,
             'Content-Type': 'application/json',
           },
         }

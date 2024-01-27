@@ -4,11 +4,17 @@ import { Topic } from './rss';
 
 require('dotenv').config();
 
+export interface Channel {
+    id: string,
+    name: string,
+    topicIds: string[]
+}
+
 export interface PendingWorkspace {
     id: string,
     accessToken: string,
     name: string,
-    channelIds: string[],
+    channels: Channel[],
     language: string,
 }
 
@@ -16,17 +22,16 @@ export interface WorkspaceId {
     id: string,
 }
 
-export interface Workspace {
-  id: string,
+export interface AcceptedWorkspace {
   accessToken: string,
   premium: boolean,
   name: string,
-  channelIds: string[],
   language: string,
+  live: boolean,
+  channels: Channel[],
   freeTrialStartDate: Timestamp,
   freeTrialEndDate: Timestamp,
 }
-
 
 const firebaseType = process.env.SERVICE_ACCOUNT_TYPE;
 const firebaseProjectId = process.env.SERVICE_ACCOUNT_PROJECT_ID;
@@ -78,20 +83,4 @@ export async function getTopicName(topicId: string): Promise<string | undefined>
   return undefined;
 }
 
-export async function getWorkspaceLanguage(workspaceId: string): Promise<string> {
-  const workspaces = await db.collection("acceptedWorkspaces").get();
-
-  if (!workspaces.empty) {
-      for (const workspace of workspaces.docs) {
-          if (workspace.exists) {
-              if (workspace.id === workspaceId) {
-                  const data = workspace.data() as Workspace;
-                  return data.language;
-              }
-          }
-      }
-  }
-
-  return "English";
-}
 

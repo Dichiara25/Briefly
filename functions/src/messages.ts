@@ -6,16 +6,6 @@ const maxHeaderTextLength = 150;
 const maxSimpleSectionTextLength = 3000;
 const maxDoubleSectionTextLength = 2000;
 
-export interface SlackChannel {
-    id: string,
-    name: string,
-    workspaceId: string,
-    language: string,
-    live: boolean,
-    keywords: string[],
-    lastDelivery: Timestamp,
-}
-
 export interface Text {
     type: string,
     text: string
