@@ -1,5 +1,4 @@
 import { Article } from './rss';
-import { getTopicName } from './firestore';
 
 const maxHeaderTextLength = 150;
 const maxSimpleSectionTextLength = 3000;
@@ -93,8 +92,7 @@ async function getSummary(articleContent: string): Promise<string> {
 }
 
 async function getTopic(topicId: string): Promise<string> {
-    const topicName = await getTopicName(topicId);
-    return `:tropical_drink: *Topic*\n${topicName !== undefined ? topicName : topicId}`;
+    return `:tropical_drink: *Topic*\n${topicId}`;
 }
 
 async function getSentiment(summary: string): Promise<string> {

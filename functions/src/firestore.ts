@@ -66,21 +66,3 @@ if (admin.apps.length === 0) {
 
 export const db = admin.firestore();
 
-export async function getTopicName(topicId: string): Promise<string | undefined> {
-  const topics = await db.collection("topics").get();
-
-  if (!topics.empty) {
-      for (const topic of topics.docs) {
-          if (topic.exists) {
-              if (topic.id === topicId) {
-                  const data = topic.data() as Topic;
-                  return data.name;
-              }
-          }
-      }
-  }
-
-  return undefined;
-}
-
-

@@ -1,4 +1,5 @@
-import type { Metadata } from 'next'
+"use client"
+
 import { Roboto } from 'next/font/google'
 import {Toaster} from "react-hot-toast";
 import './globals.css';
@@ -29,10 +30,10 @@ export default function RootLayout({
     <html lang="en" className={roboto.className}>
       <AppMetadata />
       <body>
-        <Toaster />
-        <Header />
-        <div>{children}</div>
-        <Footer />
+          <Toaster />
+          <Header />
+          {children}
+          <Footer />
       </body>
     </html>
   )

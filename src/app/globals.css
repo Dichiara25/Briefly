@@ -83,5 +83,7 @@ input, select {
   border-radius: 10px;
   border-style: solid;
   font-size: large;
+  font-weight: bold;
   text-align: center;
+  background-color: white;
 }

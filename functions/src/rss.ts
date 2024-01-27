@@ -31,8 +31,6 @@ export interface RssRootObject {
 }
 
 export interface Topic {
-    id?: string,
-    name: string,
     feeds: string[],
     subscribers: number
 }

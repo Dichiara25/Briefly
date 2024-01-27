@@ -1,6 +1,7 @@
 import { routes } from "@/app/routes"
 import styles from "./Header.module.css"
 import { APP_NAME } from "@/app/layout"
+import { useContext } from "react"
 
 export function Brand() {
     return <a style={{display: "flex", alignItems: "center"}} href="/">

@@ -3,7 +3,13 @@
 import { supportedLanguages } from "@/app/install/languages";
 import styles from "../structure/Body.module.css";
 import AddToSlackButton from "./AddToSlackButton";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Topic } from "../../../../functions/src/rss";
+
+const topics = [
+    {id: 'aPda03sqlr', name: 'Cyber Security'},
+    {id: 'azadcokcko', name: 'Artifical Intelligence'},
+];
 
 function LanguageSelection(props: {
     language: string,
@@ -31,53 +37,102 @@ function LanguageSelection(props: {
     </>
 }
 
-const topics = [{id: 'aPda03sqlr', name: 'Cyber Security'}];
 
-function TopicSelection(props: {
-    topic: string,
-    setTopic: (topic: string) => void
+
+function TopicsSelection(props: {
+    availableTopics: string[],
+    topics: string[],
+    setTopics: (topics: string[]) => void
 }) {
     return <>
         <label>Topics</label>
         <select
             placeholder="Please select one topic or more"
-            value={props.topic}
+            value={props.topics[topics.length - 1]}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                props.setTopic(e.target.value);
+                if (!props.topics.includes(e.target.value)) {
+                    props.setTopics([...props.topics, e.target.value]);
+                }
             }
             }
         >
-            {topics.map((topic) => (
+            {props.availableTopics.map((topic: string) => (
                 <option
-                    key={topic.id}
-                    value={topic.id}
+                    key={topic}
+                    value={topic}
                 >
-                    {topic.name}
+                    {topic}
                 </option>
             ))}
         </select>
     </>
 }
 
-export default function InstallationForm() {
-    const [language, setLanguage] = useState("English");
-    const [topic, setTopic] = useState("");
+export default function InstallationForm(props: {availableTopics: string[]}) {
+    const [language, setLanguage] = useState(localStorage.getItem("language") || "English");
+    const [topics, setTopics] = useState<string[]>(() => {
+        // Attempt to get topics from localStorage
+        const savedTopics = localStorage.getItem('topics');
+        // If savedTopics exists and is not null, parse it, otherwise default to an empty array
+        return savedTopics ? JSON.parse(savedTopics) : [];
+    });
+
+    const removeTopic = (valueToRemove: string) => {
+        setTopics(prevArray => prevArray.filter(item => item !== valueToRemove));
+    };
+
+    useEffect(() => {
+        // Save topics to localStorage whenever they change
+        localStorage.setItem('topics', JSON.stringify(topics));
+    }, [topics]);
+
+    useEffect(() => {
+        // Update localStorage whenever language changes
+        localStorage.setItem("language", language);
+    }, [language]);
 
     return <div className={styles.main}>
-        <h1>Settings</h1>
-        <form style={{margin: "0 0 50px 0", alignItems: "center"}}>
+        <h1>Preferences</h1>
+        <div className={styles.subtitle}>
+            Set your topics & display language preferences
+        </div>
+        <form
+            style={{
+                margin: "50px 0",
+                textAlign: "center"
+            }}
+        >
             <div>
                 <LanguageSelection
-                    language={language}
+                    language={language as string}
                     setLanguage={setLanguage}
                 />
             </div>
             <div>
-                <TopicSelection
-                    topic={topic}
-                    setTopic={setTopic}
+                <TopicsSelection
+                    availableTopics={props.availableTopics}
+                    topics={topics}
+                    setTopics={setTopics}
                 />
             </div>
+            {topics.length > 0 &&
+                <div>
+                    {topics.map((topic) => (
+                        <button
+                            key={topic}
+                            style={{background: 'orange', margin: "10px", padding: "10px 20px", borderRadius: "20px"}}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                removeTopic(topic);
+                            }
+                            }
+                        >
+                            - {topic}
+                        </button>
+                    )
+                    )}
+                </div>
+            }
         </form>
         <AddToSlackButton />
     </div>
