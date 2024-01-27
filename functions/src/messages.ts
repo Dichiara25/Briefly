@@ -89,7 +89,7 @@ function getTitle(articleTitle: string): string {
 }
 
 async function getSummary(articleContent: string): Promise<string> {
-    return `:newspaper: *Summary*\n${articleContent}...`;
+    return `:newspaper: *Summary*\n${articleContent.slice(0, 150)}...`;
 }
 
 async function getTopic(topicId: string): Promise<string> {
