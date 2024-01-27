@@ -4,12 +4,6 @@ import { supportedLanguages } from "@/app/install/languages";
 import styles from "../structure/Body.module.css";
 import AddToSlackButton from "./AddToSlackButton";
 import { useEffect, useState } from "react";
-import { Topic } from "../../../../functions/src/rss";
-
-const topics = [
-    {id: 'aPda03sqlr', name: 'Cyber Security'},
-    {id: 'azadcokcko', name: 'Artifical Intelligence'},
-];
 
 function LanguageSelection(props: {
     language: string,
@@ -48,7 +42,7 @@ function TopicsSelection(props: {
         <label>Channels</label>
         <select
             placeholder="Please select one topic or more"
-            value={props.topics[topics.length - 1]}
+            value={props.topics[props.topics.length - 1]}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                 if (!props.topics.includes(e.target.value)) {
                     props.setTopics([...props.topics, e.target.value]);
