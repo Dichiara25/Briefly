@@ -1,6 +1,5 @@
 'use server'
 
-import { Topic } from "../../../functions/src/rss";
 import { db } from "./config";
 
 export async function getAvailableTopics(): Promise<string[]> {

@@ -1,4 +1,3 @@
-import { Topic } from '../../../functions/src/rss'
 import InstallationForm from '../components/slack/InstallationForm'
 import { getAvailableTopics } from '../firebase/topics'
 
