@@ -100,7 +100,7 @@ async function getSentiment(summary: string): Promise<string> {
 }
 
 function getLink(articleLink: string): string {
-    return `:link: *<${articleLink}|Full article (${articleLink.split('https://')[1].split('/')[0]})>`;
+    return `:link: *<${articleLink}|Full article (${articleLink.split('https://')[1].split('/')[0]})>*`;
 }
 
 export async function formatMessage(article: Article, language: string): Promise<Block[]> {
