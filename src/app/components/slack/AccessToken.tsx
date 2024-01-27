@@ -7,7 +7,6 @@ import { useEffect, useState } from 'react';
 import toast from "react-hot-toast";
 import { APP_NAME } from '@/app/layout';
 import { db } from '@/app/firebase/config';
-import { Timestamp } from 'firebase/firestore';
 import { routes } from '@/app/routes';
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_SLACK_CLIENT_ID;
@@ -86,24 +85,25 @@ export default function AccessToken() {
                 .doc(teamId)
                 .set(workspaceData)
                 .then(() => {
-                  toast.success(`Success`);
+                  toast.success(`Success 🔥`);
                   redirect(routes.home);
                 });
             } else {
-              toast(`${APP_NAME} is already installed in this workspace 😀`);
+              toast.error(`It seems ${APP_NAME} is already installed in this workspace 🤔`);
               redirect(routes.home);
             }
           })
           .catch(error => {
-            toast.error(`An error occurred while installing ${APP_NAME} 😔`);
+            toast.error(`An error occurred 😔`);
             console.error('An error occurred while retrieving the access token:', error);
+            redirect(routes.home);
           });
         }
       }, [code]);
 
     return (
         <div className={styles.main}>
-            <h1>Thanks for installing {APP_NAME} 🔥</h1>
+            <h1>Thanks for installing {APP_NAME}</h1>
             <p>{token ? 'You are going to be redirected...' : 'Please wait...'}</p>
         </div>
     );
