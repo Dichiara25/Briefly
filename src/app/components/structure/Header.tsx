@@ -1,7 +1,6 @@
 import { routes } from "@/app/routes"
 import styles from "./Header.module.css"
 import { APP_NAME } from "@/app/layout"
-import AddToSlackButton from "../slack/AddToSlackButton"
 
 export function Brand() {
     return <a style={{display: "flex", alignItems: "center"}} href="/">
@@ -14,7 +13,9 @@ export function Navigation() {
     return <>
         <a href={routes.documentation}>Documentation</a>
         <a href={routes.pricing}>Pricing</a>
-        <AddToSlackButton />
+        <a href={routes.install}>
+            <button>Add to Slack</button>
+        </a>
     </>
 }
 

@@ -28,10 +28,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={roboto.className}>
       <AppMetadata />
-      <Toaster />
-      <Header />
-      <div>{children}</div>
-      <Footer />
+      <body>
+        <Toaster />
+        <Header />
+        <div>{children}</div>
+        <Footer />
+      </body>
     </html>
   )
 }

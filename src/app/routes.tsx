@@ -4,5 +4,6 @@ export const routes = {
     'termsOfUse': "/terms",
     'documentation': "/documentation",
     'pricing': "/pricing",
-    'oauth2': "/oauth2"
+    'oauth2': "/oauth2",
+    'install': "/install"
 }
