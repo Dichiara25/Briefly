@@ -1,6 +1,5 @@
 import * as admin from 'firebase-admin';
 import { Timestamp } from "firebase-admin/firestore";
-import { Topic } from './rss';
 
 require('dotenv').config();
 

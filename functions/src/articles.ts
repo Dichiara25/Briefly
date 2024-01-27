@@ -66,17 +66,13 @@ export async function fetchTopics(): Promise<Topic[]> {
 
     if (!topicsDocuments.empty){
       topicsDocuments.forEach((topicDocument) => {
-        const topicId = topicDocument.id;
-
         if (topicDocument.exists) {
           const topicData = topicDocument.data() as Topic;
-          const topicName: string = topicData.name;
           const topicFeeds: string[] = topicData.feeds;
           const subscribers: number = topicData.subscribers;
 
           const topic: Topic = {
-            id: topicId,
-            name: topicName,
+            id: topicDocument.id,
             feeds: topicFeeds,
             subscribers: subscribers
           };

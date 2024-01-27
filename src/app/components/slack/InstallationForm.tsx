@@ -45,7 +45,7 @@ function TopicsSelection(props: {
     setTopics: (topics: string[]) => void
 }) {
     return <>
-        <label>Topics</label>
+        <label>Channels</label>
         <select
             placeholder="Please select one topic or more"
             value={props.topics[topics.length - 1]}
@@ -118,17 +118,40 @@ export default function InstallationForm(props: {availableTopics: string[]}) {
             {topics.length > 0 &&
                 <div>
                     {topics.map((topic) => (
-                        <button
-                            key={topic}
-                            style={{background: 'orange', margin: "10px", padding: "10px 20px", borderRadius: "20px"}}
-                            onClick={(e) => {
-                                e.preventDefault();
-                                removeTopic(topic);
-                            }
-                            }
-                        >
-                            - {topic}
-                        </button>
+                        <div style={{display: "flex", alignItems: "center", margin: "20px 0",}}>
+                            <button
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    removeTopic(topic);
+                                    }
+                                }
+                                style={{
+                                    background: "none",
+                                    padding: 0,
+                                    fontSize: "xxx-large",
+                                }}
+                            >
+                                🗑️
+                            </button>
+                            <button
+                                key={topic}
+                                style={{
+                                    margin: "0",
+                                    padding: "10px 20px",
+                                    scale: "1",
+                                    opacity: "1"
+                                }}
+                            >
+                                <div>
+                                    {topic}
+                                </div>
+                                <input
+                                    style={{border: "none"}}
+                                    placeholder="#channel-name"
+                                    defaultValue="#general"
+                                />
+                            </button>
+                        </div>
                     )
                     )}
                 </div>
