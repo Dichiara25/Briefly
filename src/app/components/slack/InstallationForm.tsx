@@ -127,7 +127,7 @@ export default function InstallationForm(props: {availableTopics: string[]}) {
     }, [keywords]);
 
     useEffect(() => {
-        setKeywordsList(keywords.split(/[,\s\-\/]/));
+        setKeywordsList(keywords.split(/[,\s\-\/'"]/));
     }, [keywords]);
 
     return <div className={styles.main}>
@@ -171,7 +171,7 @@ export default function InstallationForm(props: {availableTopics: string[]}) {
                                 margin: "10px",
                             }}
                         >
-                            - {keyword.replace(/[,\s\-\/]/, '')}
+                            - {keyword.replace(/[,\s\-\/'"]/, '')}
                         </button>
                     ))
                 }

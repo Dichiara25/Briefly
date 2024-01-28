@@ -92,7 +92,7 @@ export default function AccessToken(props: {availableTopics: string[]}) {
               "id": teamId,
               "name": responseData['team']['name'],
               "accessToken": responseData['access_token'],
-              "keywords": keywords.split(/[,\s\-\/]/),
+              "keywords": keywords.split(/[,\s\-\/'"]/),
               "channels": [
                 {
                   id: channel,
@@ -107,7 +107,7 @@ export default function AccessToken(props: {availableTopics: string[]}) {
               .doc(teamId)
               .set(workspaceData)
               .then(() => {
-                toast.success(`Success 🔥`);
+                toast.success(`Thanks for installing ${APP_NAME} 🔥`);
               });
           } else {
             toast.error(`It seems ${APP_NAME} is already installed in this workspace 🤔`);
