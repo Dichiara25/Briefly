@@ -99,18 +99,17 @@ export default function AccessToken(props: {availableTopics: string[]}) {
                 .set(workspaceData)
                 .then(() => {
                   toast.success(`Success 🔥`);
-                  redirect(routes.home);
                 });
             } else {
               toast.error(`It seems ${APP_NAME} is already installed in this workspace 🤔`);
-              redirect(routes.home);
             }
           })
           .catch(error => {
             toast.error(`An error occurred 😔`);
             console.error('An error occurred while retrieving the access token:', error);
-            redirect(routes.home);
           });
+
+          redirect(routes.home);
         }
       }, [code]);
 
