@@ -9,8 +9,14 @@ function LanguageSelection(props: {
     language: string,
     setLanguage: (language: string) => void
 }) {
-    return <>
+    return <div style={{
+        display: "flex",
+        flexDirection: "column"
+    }}>
         <label>Language</label>
+        <div className={styles.subtitle}>
+            Language you would like news to be translated to
+        </div>
         <select
             placeholder="Please select a language"
             value={props.language}
@@ -28,39 +34,32 @@ function LanguageSelection(props: {
                 </option>
             ))}
         </select>
-    </>
+    </div>
 }
 
 
-
-function TopicsSelection(props: {
-    availableTopics: string[],
-    topics: string[],
-    setTopics: (topics: string[]) => void
+function ChannelSelection(props: {
+    channel: string,
+    setChannel: (channel: string) => void
 }) {
-    return <>
-        <label>Channels</label>
-        <select
-            placeholder="Please select one topic or more"
-            value={props.topics[props.topics.length - 1]}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                if (!props.topics.includes(e.target.value)) {
-                    props.setTopics([...props.topics, e.target.value]);
-                }
-            }
-            }
-        >
-            {props.availableTopics.map((topic: string) => (
-                <option
-                    key={topic}
-                    value={topic}
-                >
-                    {topic}
-                </option>
-            ))}
-        </select>
-    </>
+    return <div style={{
+            display: "flex",
+            flexDirection: "column"
+        }}>
+            <label>Channel</label>
+            <div className={styles.subtitle}>
+                Channel name you would like to receive news in
+            </div>
+            <input
+                placeholder="#channel-name"
+                type="text"
+                value={props.channel}
+                onChange={(e) => props.setChannel(e.target.value)}
+                required
+            />
+        </div>
 }
+
 
 export default function InstallationForm(props: {availableTopics: string[]}) {
     const [language, setLanguage] = useState(() => {
@@ -70,99 +69,43 @@ export default function InstallationForm(props: {availableTopics: string[]}) {
             return "English"
         }
     });
-    const [topics, setTopics] = useState<string[]>(() => {
-            if (typeof window !== 'undefined') {
-                // Attempt to get topics from localStorage
-                const savedTopics = localStorage.getItem('topics');
-                // If savedTopics exists and is not null, parse it, otherwise default to an empty array
-                return savedTopics ? JSON.parse(savedTopics) : [];
-            } else {
-                return []
-            }
+    const [channel, setChannel] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem("channel") || "#general"
+        } else {
+            return "#general"
+        }
     });
-
-    const removeTopic = (valueToRemove: string) => {
-        setTopics(prevArray => prevArray.filter(item => item !== valueToRemove));
-    };
-
-    useEffect(() => {
-        // Save topics to localStorage whenever they change
-        localStorage.setItem('topics', JSON.stringify(topics));
-    }, [topics]);
 
     useEffect(() => {
         // Update localStorage whenever language changes
         localStorage.setItem("language", language);
     }, [language]);
 
+    useEffect(() => {
+        // Update localStorage whenever language changes
+        localStorage.setItem("channel", channel);
+    }, [channel]);
+
     return <div className={styles.main}>
         <h1>Preferences</h1>
         <div className={styles.subtitle}>
-            Set your topics & display language preferences
+            Set your channel & display language preferences
         </div>
         <form
             style={{
                 margin: "50px 0",
-                textAlign: "center"
+                textAlign: "center",
             }}
         >
-            <div>
-                <LanguageSelection
-                    language={language as string}
-                    setLanguage={setLanguage}
-                />
-            </div>
-            <div>
-                <TopicsSelection
-                    availableTopics={props.availableTopics}
-                    topics={topics}
-                    setTopics={setTopics}
-                />
-            </div>
-            {topics.length > 0 &&
-                <div>
-                    {topics.map((topic) => (
-                        <div
-                            key={topic}
-                            style={{display: "flex", alignItems: "center", margin: "20px 0"}}
-                        >
-                            <button
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    removeTopic(topic);
-                                    }
-                                }
-                                style={{
-                                    background: "none",
-                                    padding: 0,
-                                    fontSize: "xxx-large",
-                                }}
-                            >
-                                🗑️
-                            </button>
-                            <button
-                                key={topic}
-                                style={{
-                                    margin: "0",
-                                    padding: "10px 20px",
-                                    scale: "1",
-                                    opacity: "1"
-                                }}
-                            >
-                                <div>
-                                    {topic}
-                                </div>
-                                <input
-                                    style={{border: "none"}}
-                                    placeholder="#channel-name"
-                                    defaultValue="#general"
-                                />
-                            </button>
-                        </div>
-                    )
-                    )}
-                </div>
-            }
+            <LanguageSelection
+                language={language as string}
+                setLanguage={setLanguage}
+            />
+            <ChannelSelection
+                channel={channel}
+                setChannel={setChannel}
+            />
         </form>
         <AddToSlackButton />
     </div>

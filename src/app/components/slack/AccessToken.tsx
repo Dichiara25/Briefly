@@ -8,13 +8,13 @@ import toast from "react-hot-toast";
 import { APP_NAME } from '@/app/layout';
 import { db } from '@/app/firebase/config';
 import { routes } from '@/app/routes';
+import { getAvailableTopics } from '@/app/firebase/topics';
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_SLACK_CLIENT_ID;
 const CLIENT_SECRET = process.env.NEXT_PUBLIC_SLACK_CLIENT_SECRET;
 
 export interface Channel {
   id: string,
-  name: string,
   topicIds: string[]
 }
 
@@ -26,10 +26,24 @@ export interface PendingWorkspace {
   language: string,
 }
 
-export default function AccessToken() {
+export default function AccessToken(props: {availableTopics: string[]}) {
     const searchParams = useSearchParams();
     const code = searchParams.get("code");
     const [token, setToken] = useState("");
+    const [language] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem("language") || "English"
+        } else {
+            return "English"
+        }
+    });
+    const [channel] = useState(() => {
+      if (typeof window !== 'undefined') {
+          return localStorage.getItem("channel") || "#general"
+      } else {
+          return "#general"
+      }
+  });
 
     useEffect(() => {
         if (code) {
@@ -72,12 +86,11 @@ export default function AccessToken() {
                 "accessToken": responseData['access_token'],
                 "channels": [
                   {
-                    id: "",
-                    name: "",
-                    topicIds: [],
+                    id: channel,
+                    topicIds: props.availableTopics,
                   }
                 ],
-                "language": "English",
+                "language": language,
               };
 
               db

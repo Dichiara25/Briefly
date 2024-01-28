@@ -5,7 +5,6 @@ require('dotenv').config();
 
 export interface Channel {
     id: string,
-    name: string,
     topicIds: string[]
 }
 
