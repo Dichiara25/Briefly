@@ -24,6 +24,7 @@ export interface PendingWorkspace {
   name: string,
   channels: Channel[],
   language: string,
+  keywords: string[],
 }
 
 export default function AccessToken(props: {availableTopics: string[]}) {
@@ -44,79 +45,87 @@ export default function AccessToken(props: {availableTopics: string[]}) {
           return "#general"
       }
   });
+  const [keywords, setKeywords] = useState(() => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem("keywords") || ""
+    } else {
+        return ""
+    }
+  });
 
-    useEffect(() => {
-        if (code) {
-          // Create a FormData object
-          const formData = new FormData();
-          formData.append('code', code as string);
-          formData.append('client_id', CLIENT_ID as string);
-          formData.append('client_secret', CLIENT_SECRET as string);
+  useEffect(() => {
+      if (code) {
+        // Create a FormData object
+        const formData = new FormData();
+        formData.append('code', code as string);
+        formData.append('client_id', CLIENT_ID as string);
+        formData.append('client_secret', CLIENT_SECRET as string);
 
-          axios.post('https://slack.com/api/oauth.v2.access', formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data'
-            }
-          })
-          .then(async response => {
-            const responseData = response.data;
-            const teamId = responseData['team']['id'];
-            const existingWorkspaceIds = await db
-              .collection('acceptedWorkspaces')
-              .get()
-              .then((docs) => {
-                if (!docs.empty) {
-                  const array: string[] = [];
-                  docs.forEach((doc) => {
-                    if (doc.exists) {
-                      array.push(doc.id);
-                    }
-                  });
-
-                  return array;
-                }
-            })
-
-            if (!existingWorkspaceIds?.includes(teamId)) {
-              setToken(responseData['access_token']);
-
-              const workspaceData: PendingWorkspace = {
-                "id": teamId,
-                "name": responseData['team']['name'],
-                "accessToken": responseData['access_token'],
-                "channels": [
-                  {
-                    id: channel,
-                    topicIds: props.availableTopics,
+        axios.post('https://slack.com/api/oauth.v2.access', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        })
+        .then(async response => {
+          const responseData = response.data;
+          const teamId = responseData['team']['id'];
+          const existingWorkspaceIds = await db
+            .collection('acceptedWorkspaces')
+            .get()
+            .then((docs) => {
+              if (!docs.empty) {
+                const array: string[] = [];
+                docs.forEach((doc) => {
+                  if (doc.exists) {
+                    array.push(doc.id);
                   }
-                ],
-                "language": language,
-              };
-
-              db
-                .collection('pendingWorkspaces')
-                .doc(teamId)
-                .set(workspaceData)
-                .then(() => {
-                  toast.success(`Success 🔥`);
                 });
-            } else {
-              toast.error(`It seems ${APP_NAME} is already installed in this workspace 🤔`);
-            }
+
+                return array;
+              }
           })
-          .catch(error => {
-            toast.error(`An error occurred 😔`);
-            console.error('An error occurred while retrieving the access token:', error);
-          });
 
-          redirect(routes.home);
-        }
-      }, [code]);
+          if (!existingWorkspaceIds?.includes(teamId)) {
+            setToken(responseData['access_token']);
 
-    return (
-        <div className={styles.main}>
-            <h1>Thanks for installing {APP_NAME}</h1>
-            <p>{token ? 'You are going to be redirected...' : 'Please wait...'}</p>
-        </div>
-    );
+            const workspaceData: PendingWorkspace = {
+              "id": teamId,
+              "name": responseData['team']['name'],
+              "accessToken": responseData['access_token'],
+              "keywords": keywords.split(/[,\s\-\/]/),
+              "channels": [
+                {
+                  id: channel,
+                  topicIds: props.availableTopics,
+                }
+              ],
+              "language": language,
+            };
+
+            db
+              .collection('pendingWorkspaces')
+              .doc(teamId)
+              .set(workspaceData)
+              .then(() => {
+                toast.success(`Success 🔥`);
+              });
+          } else {
+            toast.error(`It seems ${APP_NAME} is already installed in this workspace 🤔`);
+          }
+        })
+        .catch(error => {
+          toast.error(`An error occurred 😔`);
+          console.error('An error occurred while retrieving the access token:', error);
+        });
+
+        redirect(routes.home);
+      }
+    }, [code]);
+
+  return (
+      <div className={styles.main}>
+          <h1>Thanks for installing {APP_NAME}</h1>
+          <p>{token ? 'You are going to be redirected...' : 'Please wait...'}</p>
+      </div>
+  );
 }

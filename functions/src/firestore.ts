@@ -14,6 +14,7 @@ export interface PendingWorkspace {
     name: string,
     channels: Channel[],
     language: string,
+    keywords: string[],
 }
 
 export interface WorkspaceId {
@@ -27,6 +28,7 @@ export interface AcceptedWorkspace {
   language: string,
   live: boolean,
   channels: Channel[],
+  keywords: string[],
   freeTrialStartDate: Timestamp,
   freeTrialEndDate: Timestamp,
 }

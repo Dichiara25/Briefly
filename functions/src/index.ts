@@ -88,6 +88,7 @@ exports.authorizeWorkspace = onDocumentCreated("pendingWorkspaces/{docId}", asyn
         accessToken: pendingWorkspace.accessToken,
         channels: pendingWorkspace.channels,
         language: pendingWorkspace.language,
+        keywords: pendingWorkspace.keywords,
         premium: false,
         live: false,
         freeTrialStartDate: Timestamp.now(),
