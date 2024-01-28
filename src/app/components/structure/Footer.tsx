@@ -26,6 +26,7 @@ export default function Footer() {
             <div style={{display: "flex", flexDirection: "column", opacity: ".4"}}>
                 <a style={{margin: "10px 0"}} href={routes.privacy}>Privacy</a>
                 <a style={{margin: "10px 0"}} href={routes.termsOfUse}>Terms of use</a>
+                <a style={{margin: "10px 0"}} href={routes.scopes}>Scopes</a>
             </div>
         </div>
     </div>
