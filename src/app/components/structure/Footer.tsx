@@ -28,6 +28,12 @@ export default function Footer() {
                 <a style={{margin: "10px 0"}} href={routes.termsOfUse}>Terms of use</a>
                 <a style={{margin: "10px 0"}} href={routes.scopes}>Scopes</a>
             </div>
+            <div style={{margin: "0 50px", opacity: ".3"}}>
+                |
+            </div>
+            <a href="mailto:support@briefly.rocks">
+                support@briefly.rocks
+            </a>
         </div>
     </div>
 }
