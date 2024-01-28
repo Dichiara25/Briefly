@@ -92,7 +92,7 @@ export default function AccessToken(props: {availableTopics: string[]}) {
               "id": teamId,
               "name": responseData['team']['name'],
               "accessToken": responseData['access_token'],
-              "keywords": keywords.split(/[,\s\-\/'"]/),
+              "keywords": keywords.split(/[,\s\-\/]/),
               "channels": [
                 {
                   id: channel,
