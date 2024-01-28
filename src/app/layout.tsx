@@ -17,7 +17,7 @@ const roboto = Roboto({
 function AppMetadata() {
   return <head>
     <title>{APP_NAME}</title>
-    <meta name='description' content='Your AI-powered newsfeed in Slack' />
+    <meta name='description' content='AI-powered security news for Slack' />
   </head>
 }
 

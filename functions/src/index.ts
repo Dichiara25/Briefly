@@ -54,11 +54,16 @@ exports.publishNewArticles = onDocumentCreated("articles/{docId}", async (event)
                 const workspaceToken = workspaceData.accessToken;
                 const workspaceLanguage = workspaceData.language;
                 const workspaceChannels: Channel[] = workspaceData.channels;
+                const workspaceKeywords: string[] = workspaceData.keywords;
 
                 workspaceChannels.forEach(async (channel: Channel) => {
                     if (channel.topicIds.includes(article.topicId)) {
                         const channelName = channel.id;
-                        const message = await formatMessage(article, workspaceLanguage);
+                        const message = await formatMessage(
+                            article,
+                            workspaceLanguage,
+                            workspaceKeywords
+                        );
 
                         await sendMessageToSlackChannel(
                             workspaceToken,

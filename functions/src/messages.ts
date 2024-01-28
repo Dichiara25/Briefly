@@ -103,27 +103,47 @@ function getLink(articleLink: string): string {
     return `:link: *<${articleLink}|Full article (${articleLink.split('https://')[1].split('/')[0]})>*`;
 }
 
-export async function formatMessage(article: Article, language: string): Promise<Block[]> {
+function getKeywords(keywords: string[]): string {
+    return `:loudspeaker: <!here> *The following keywords are mentioned*\n${keywords.join(', ')}`
+}
+
+export async function formatMessage(article: Article, language: string, keywords: string[]): Promise<Block[]> {
     const blocks: Block[] = []
+    const matchingWords: string[] = []
+
+    keywords.forEach((keyword: string) => {
+        if (article.title.includes(keyword)) {
+            matchingWords.push(keyword);
+        }
+    })
 
     const title = getTitle(article.title);
     const topic = await getTopic(article.topicId);
+    const formattedKeywords = getKeywords(keywords);
     const summary = await getSummary(article.content);
     const sentiment = await getSentiment(summary);
     const link = getLink(article.link);
 
     const titleBlock: SimpleSection = formatTitle(title);
     const metadataBlock: DoubleSection = formatDoubleSection(topic, sentiment);
-    const summaryBlock: SimpleSection = formatSimpleSection(summary);
     const firstDividerBlock: Divider = formatDivider(0);
-    const linkBlock: SimpleSection = formatSimpleSection(link);
+    const matchingWordsBlock: SimpleSection = formatSimpleSection(formattedKeywords);
     const secondDividerBlock: Divider = formatDivider(1);
+    const summaryBlock: SimpleSection = formatSimpleSection(summary);
+    const thirdDividerBlock: Divider = formatDivider(2);
+    const linkBlock: SimpleSection = formatSimpleSection(link);
 
     blocks.push(titleBlock);
     blocks.push(metadataBlock);
     blocks.push(firstDividerBlock);
+
+    if (matchingWords.length > 0) {
+        blocks.push(matchingWordsBlock);
+        blocks.push(secondDividerBlock);
+    }
+
     blocks.push(summaryBlock);
-    blocks.push(secondDividerBlock);
+    blocks.push(thirdDividerBlock);
     blocks.push(linkBlock);
 
     return blocks;

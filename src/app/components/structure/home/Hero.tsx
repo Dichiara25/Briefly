@@ -7,10 +7,10 @@ export default function Hero() {
    return (
       <main className={styles.main}>
         <h1>
-          An AI-powered newsfeed. Right into your Slack. ✨
+          AI-powered security news. Right into your Slack. ✨
         </h1>
         <div className={styles.subtitle}>
-          {APP_NAME} helps you keeping up by sending you byte-sized reports on your favorite topics.
+          Stay ahead of the curve with byte-sized news reports and AI-generated insights.
         </div>
         <div style={{margin: "100px 0", fontSize: "x-large"}}>
           <a href={routes.install}>
