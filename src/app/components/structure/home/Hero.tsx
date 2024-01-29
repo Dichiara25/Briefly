@@ -1,6 +1,4 @@
-import { APP_NAME } from '@/app/layout'
 import styles from '../Body.module.css'
-import AddToSlackButton from '../../slack/AddToSlackButton'
 import { routes } from '@/app/routes'
 
 export default function Hero() {
@@ -17,7 +15,6 @@ export default function Hero() {
               <button>Add to Slack</button>
           </a>
         </div>
-        <hr />
       </main>
    )
 }

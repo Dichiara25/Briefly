@@ -111,11 +111,13 @@ export async function formatMessage(article: Article, language: string, keywords
     const blocks: Block[] = []
     const matchingWords: string[] = []
 
-    keywords.forEach((keyword: string) => {
-        if (article.title.includes(keyword)) {
-            matchingWords.push(keyword);
-        }
-    })
+    if (keywords.length > 0) {
+        keywords.forEach((keyword: string) => {
+            if (article.title.includes(keyword)) {
+                matchingWords.push(keyword);
+            }
+        })
+    }
 
     const title = getTitle(article.title);
     const topic = await getTopic(article.topicId);
