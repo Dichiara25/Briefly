@@ -83,27 +83,27 @@ function formatDivider(id: number): Divider {
     }
 }
 
-function getTitle(articleTitle: string): string {
+function getTitle(articleTitle: string, language: string): string {
     return `:rolled_up_newspaper: ${articleTitle}`;
 }
 
-async function getSummary(articleContent: string): Promise<string> {
+async function getSummary(articleContent: string, language: string): Promise<string> {
     return `:newspaper: *Summary*\n${articleContent.slice(0, 150)}...`;
 }
 
-async function getTopic(topicId: string): Promise<string> {
+async function getTopic(topicId: string, language: string): Promise<string> {
     return `:tropical_drink: *Topic*\n${topicId}`;
 }
 
-async function getSentiment(summary: string): Promise<string> {
+async function getSentiment(summary: string, language: string): Promise<string> {
     return ":cocktail: *Sentiment*\nGood news :relieved:";
 }
 
-function getLink(articleLink: string): string {
+function getLink(articleLink: string, language: string): string {
     return `:link: *<${articleLink}|Full article (${articleLink.split('https://')[1].split('/')[0]})>*`;
 }
 
-function getKeywords(keywords: string[]): string {
+function getKeywords(keywords: string[], language: string): string {
     return `:loudspeaker: <!here> *The following keywords are mentioned*\n${keywords.join(', ')}`
 }
 
@@ -119,12 +119,12 @@ export async function formatMessage(article: Article, language: string, keywords
         })
     }
 
-    const title = getTitle(article.title);
-    const topic = await getTopic(article.topicId);
-    const formattedKeywords = getKeywords(keywords);
-    const summary = await getSummary(article.content);
-    const sentiment = await getSentiment(summary);
-    const link = getLink(article.link);
+    const title = getTitle(article.title, language);
+    const topic = await getTopic(article.topicId, language);
+    const formattedKeywords = getKeywords(keywords, language);
+    const summary = await getSummary(article.content, language);
+    const sentiment = await getSentiment(summary, language);
+    const link = getLink(article.link, language);
 
     const titleBlock: SimpleSection = formatTitle(title);
     const metadataBlock: DoubleSection = formatDoubleSection(topic, sentiment);
