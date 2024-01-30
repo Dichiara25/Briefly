@@ -1,5 +1,5 @@
 const CLIENT_ID = process.env.NEXT_PUBLIC_SLACK_CLIENT_ID;
-const SCOPES = "channels:join,chat:write,chat:write.public,commands";
+const SCOPES = "chat:write,chat:write.public,commands";
 
 export default function AddToSlackButton() {
     const STATE = "The cat is purring next to the chimney";

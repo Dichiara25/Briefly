@@ -5,13 +5,9 @@ export default function Scopes() {
     return <div className={styles.main}>
         <h1>Scopes</h1>
         <div className={styles.subtitle}>
-            The following scopes are required by {APP_NAME} to work properly
+            Only 3 scopes are required by {APP_NAME} to work properly
         </div>
         <div style={{marginTop: "50px", textAlign: "center"}}>
-            <label>channels:join</label>
-            <div className={styles.subtitle} style={{margin: "10px 0 30px 0"}}>
-                Join public channels in a workspace
-            </div>
             <label>chat:write</label>
             <div className={styles.subtitle} style={{margin: "10px 0 30px 0"}}>
                 Send messages as @{APP_NAME}
@@ -22,7 +18,7 @@ export default function Scopes() {
             </div>
             <label>command</label>
             <div className={styles.subtitle} style={{margin: "10px 0 30px 0"}}>
-                Add shortcuts and/or slash commands that people can use
+                Configure {APP_NAME} directly from your Slack organization
             </div>
         </div>
     </div>
