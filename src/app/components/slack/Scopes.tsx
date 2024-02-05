@@ -5,7 +5,7 @@ export default function Scopes() {
     return <div className={styles.main}>
         <h1>Scopes</h1>
         <div className={styles.subtitle}>
-            Only 3 scopes are required by {APP_NAME} to work properly
+            Only three scopes are required by {APP_NAME} to work properly
         </div>
         <div style={{marginTop: "50px", textAlign: "center"}}>
             <label>chat:write</label>
