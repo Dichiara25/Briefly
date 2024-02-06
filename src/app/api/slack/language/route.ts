@@ -1,4 +1,5 @@
 import { db } from '@/app/firebase/config';
+import { APP_NAME } from '@/app/layout';
 import type { NextRequest } from 'next/server';
 
 const headers = {
@@ -26,8 +27,6 @@ export async function POST(
     const team = data.get('team_id') as string;
     const language = data.get('text') as string;
 
-    console.log(team, language);
-
     if (!language || !team){
         return new Response(JSON.stringify({ error: 'Invalid request.' }), {
             headers: headers,
@@ -42,8 +41,8 @@ export async function POST(
         .doc('language')
         .set({'value': language}, {merge: true});
 
-    return new Response(JSON.stringify({ message: language }), {
+    return new Response(JSON.stringify(`${APP_NAME} was successfully configured to *${language}* :blush:`), {
         headers: headers,
-        status: 200, // HTTP OK
+        status: 200,
     });
 }
