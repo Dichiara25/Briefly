@@ -1,5 +1,4 @@
 import { db } from '@/app/firebase/config';
-import { APP_NAME } from '@/app/layout';
 import type { NextRequest } from 'next/server';
 
 const headers = {
@@ -41,7 +40,7 @@ export async function POST(
         .doc('language')
         .set({'value': language}, {merge: true});
 
-    return new Response(JSON.stringify(`${APP_NAME} was successfully configured to *${language}* :blush:`), {
+    return new Response(JSON.stringify(`From now on, news will be delivered in *${language}* in your Slack organization :blush:`), {
         headers: headers,
         status: 200,
     });
