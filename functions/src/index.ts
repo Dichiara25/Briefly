@@ -7,6 +7,9 @@ import { sendMessageToSlackChannel } from "./slack";
 import { daysBetweenDates, getDateIn30Days } from "./dates";
 import { formatMessage } from "./messages";
 import { Timestamp } from "firebase-admin/firestore";
+import { Request, onRequest } from "firebase-functions/v2/https";
+import { Response } from "firebase-functions/v1";
+import { supportedLanguages } from "./languages";
 
 exports.fetchNewArticles = onSchedule(
     {
@@ -147,3 +150,24 @@ exports.authorizeWorkspace = onDocumentCreated("pendingWorkspaces/{docId}", asyn
         .doc(pendingWorkspace.id)
         .delete();
 })
+
+exports.setLanguage = onRequest(
+    { cors: ["api.slack.com"] },
+    async (req: Request, res: Response) => {
+        const data = await req.body;
+        const teamId = data['team_id'] as string;
+        const language = data['text'] as string;
+
+        if (!language || !teamId){
+            res.status(400).send("A language and a team id are required.");
+        }
+
+        if (!supportedLanguages.includes(language)) {
+            res.status(200).send(`*${language}* does not belong to the supported languages :confused:`);
+        }
+
+        await setField(teamId, 'language', language);
+
+        res.status(200).send(`From now on, news will be delivered in *${language}* in your Slack organization :blush:`);
+    }
+  );
