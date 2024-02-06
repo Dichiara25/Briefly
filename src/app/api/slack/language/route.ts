@@ -5,14 +5,26 @@ const headers = {
     'Content-Type': 'application/json',
 };
 
+interface SlashCommandData {
+    token: string,
+    command: string,
+    text: string,
+    response_url: string,
+    trigger_id: string,
+    user_id: string,
+    user_name: string,
+    team_id: string,
+    entreprise_id: string,
+    channel_id: string,
+    api_app_id: string
+}
+
 export async function POST(
     req: NextRequest,
 ){
-    const data = await req.json();
-    const team = data.team;
-    const language = data.language;
-
-    console.log(team, language);
+    const data: SlashCommandData = await req.json();
+    const team = data.team_id;
+    const language = data.text;
 
     if (!language || !team){
         return new Response(JSON.stringify({ error: 'Invalid request.' }), {
@@ -24,9 +36,9 @@ export async function POST(
     await db
         .collection('acceptedWorkspaces')
         .doc(team)
-        .collection('metadata')
+        .collection('settings')
         .doc('language')
-        .set({'language': language}, {merge: true});
+        .set({'value': language}, {merge: true});
 
     return new Response(JSON.stringify({ message: language }), {
         headers: headers,
