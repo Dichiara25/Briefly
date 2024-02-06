@@ -1,4 +1,5 @@
 import { db } from '@/app/firebase/config';
+import { supportedLanguages } from '@/app/install/languages';
 import type { NextRequest } from 'next/server';
 
 const headers = {
@@ -30,6 +31,13 @@ export async function POST(
         return new Response(JSON.stringify({ error: 'Invalid request.' }), {
             headers: headers,
             status: 400
+        })
+    }
+
+    if (!supportedLanguages.includes(language)) {
+        return new Response(JSON.stringify(`*${language}* does not belong to the supported languages :confused:`), {
+            headers: headers,
+            status: 200
         })
     }
 
