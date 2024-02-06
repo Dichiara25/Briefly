@@ -121,7 +121,7 @@ export async function formatMessage(article: Article, language: string, keywords
 
     const title = getTitle(article.title, language);
     const topic = await getTopic(article.topicId, language);
-    const formattedKeywords = getKeywords(keywords, language);
+    const formattedKeywords = getKeywords(matchingWords, language);
     const summary = await getSummary(article.content, language);
     const sentiment = await getSentiment(summary, language);
     const link = getLink(article.link, language);

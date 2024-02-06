@@ -8,7 +8,11 @@ import { daysBetweenDates, getDateIn30Days } from "./dates";
 import { formatMessage } from "./messages";
 import { Timestamp } from "firebase-admin/firestore";
 
-exports.fetchNewArticles = onSchedule("31 9 * * *", async () => {
+exports.fetchNewArticles = onSchedule(
+    {
+        schedule: "31 9 * * *",
+        memory: "512MiB",
+    }, async () => {
     const topics: Topic[] = await fetchTopics();
     const storedArticlesCollection = db.collection("articles");
     const newArticles = await fetchArticles(topics);
@@ -124,7 +128,7 @@ exports.authorizeWorkspace = onDocumentCreated("pendingWorkspaces/{docId}", asyn
 
     await setField(pendingWorkspace.id, "language", pendingWorkspace.language);
     await setField(pendingWorkspace.id, "channel", pendingWorkspace.channel);
-    await setField(pendingWorkspace.id, "keywords", pendingWorkspace.keywords);
+    await setField(pendingWorkspace.id, "keywords", pendingWorkspace.keywords.filter(item => item !== ''));
     await setField(pendingWorkspace.id, "live", false);
 
     const workspaceId: WorkspaceId = {
