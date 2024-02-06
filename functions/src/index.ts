@@ -52,26 +52,21 @@ exports.publishNewArticles = onDocumentCreated("articles/{docId}", async (event)
             if (workspace.exists) {
                 const workspaceData = workspace.data() as AcceptedWorkspace;
                 const workspaceToken = workspaceData.accessToken;
-                const workspaceLanguage = workspaceData.language;
-                const workspaceChannels: Channel[] = workspaceData.channels;
-                const workspaceKeywords: string[] = workspaceData.keywords;
+                const workspaceLanguage = workspaceData.settings.language.value;
+                const workspaceChannel: string = workspaceData.settings.channel.value;
+                const workspaceKeywords: string[] = workspaceData.settings.keywords.value;
 
-                workspaceChannels.forEach(async (channel: Channel) => {
-                    if (channel.topicIds.includes(article.topicId)) {
-                        const channelName = channel.id;
-                        const message = await formatMessage(
-                            article,
-                            workspaceLanguage,
-                            workspaceKeywords
-                        );
+                const message = await formatMessage(
+                    article,
+                    workspaceLanguage,
+                    workspaceKeywords
+                );
 
-                        await sendMessageToSlackChannel(
-                            workspaceToken,
-                            channelName,
-                            message
-                        );
-                    }
-                })
+                await sendMessageToSlackChannel(
+                    workspaceToken,
+                    workspaceChannel,
+                    message
+                );
             }
         })
     }
@@ -91,11 +86,21 @@ exports.authorizeWorkspace = onDocumentCreated("pendingWorkspaces/{docId}", asyn
     const workspaceData: AcceptedWorkspace = {
         name: pendingWorkspace.name,
         accessToken: pendingWorkspace.accessToken,
-        channels: pendingWorkspace.channels,
-        language: pendingWorkspace.language,
-        keywords: pendingWorkspace.keywords,
+        settings: {
+            channel: {
+                value: pendingWorkspace.channel
+            },
+            language: {
+                value: pendingWorkspace.language
+            },
+            keywords: {
+                value: pendingWorkspace.keywords
+            },
+            live: {
+                value: false,
+            }
+        },
         premium: false,
-        live: false,
         freeTrialStartDate: Timestamp.now(),
         freeTrialEndDate: Timestamp.fromDate(freeTrialEndDate),
     }

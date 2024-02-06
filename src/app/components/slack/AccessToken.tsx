@@ -22,7 +22,7 @@ export interface PendingWorkspace {
   id: string,
   accessToken: string,
   name: string,
-  channels: Channel[],
+  channel: string,
   language: string,
   keywords: string[],
 }
@@ -70,7 +70,7 @@ export default function AccessToken(props: {availableTopics: string[]}) {
           const responseData = response.data;
           const teamId = responseData['team']['id'];
           const existingWorkspaceIds = await db
-            .collection('acceptedWorkspaces')
+            .collection('workspacesIds')
             .get()
             .then((docs) => {
               if (!docs.empty) {
@@ -93,12 +93,7 @@ export default function AccessToken(props: {availableTopics: string[]}) {
               "name": responseData['team']['name'],
               "accessToken": responseData['access_token'],
               "keywords": keywords.split(/[,\s\-\/]/),
-              "channels": [
-                {
-                  id: channel,
-                  topicIds: props.availableTopics,
-                }
-              ],
+              "channel": channel,
               "language": language,
             };
 

@@ -12,7 +12,7 @@ export interface PendingWorkspace {
     id: string,
     accessToken: string,
     name: string,
-    channels: Channel[],
+    channel: string,
     language: string,
     keywords: string[],
 }
@@ -21,14 +21,26 @@ export interface WorkspaceId {
     id: string,
 }
 
+export interface Settings {
+    language: {
+        value: string
+    },
+    keywords: {
+        value: string[]
+    },
+    live: {
+        value: boolean
+    },
+    channel: {
+        value: string,
+    }
+}
+
 export interface AcceptedWorkspace {
   accessToken: string,
   premium: boolean,
   name: string,
-  language: string,
-  live: boolean,
-  channels: Channel[],
-  keywords: string[],
+  settings: Settings,
   freeTrialStartDate: Timestamp,
   freeTrialEndDate: Timestamp,
 }
