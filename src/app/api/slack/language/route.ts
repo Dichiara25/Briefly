@@ -22,9 +22,11 @@ interface SlashCommandData {
 export async function POST(
     req: NextRequest,
 ){
-    const data: SlashCommandData = await req.json();
-    const team = data.team_id;
-    const language = data.text;
+    const data = await req.formData();
+    const team = data.get('team_id') as string;
+    const language = data.get('text') as string;
+
+    console.log(team, language);
 
     if (!language || !team){
         return new Response(JSON.stringify({ error: 'Invalid request.' }), {
