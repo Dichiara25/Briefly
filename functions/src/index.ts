@@ -2,7 +2,7 @@ const { onSchedule } = require("firebase-functions/v2/scheduler");
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { Article, Topic } from './rss';
 import { fetchArticles, fetchTopics } from './articles';
-import { PendingWorkspace, AcceptedWorkspace, WorkspaceId, db, Channel } from './firestore';
+import { PendingWorkspace, AcceptedWorkspace, WorkspaceId, db } from './firestore';
 import { sendMessageToSlackChannel } from "./slack";
 import { daysBetweenDates, getDateIn30Days } from "./dates";
 import { formatMessage } from "./messages";
@@ -36,6 +36,22 @@ exports.deleteOldArticles = onSchedule("0 0 * * *", async () => {
     })
 });
 
+async function getSettingValue(documentId: string, field: string): Promise<any> {
+    const document = await db
+        .collection("acceptedWorkspaces")
+        .doc(documentId)
+        .collection("settings")
+        .doc(field)
+        .get();
+
+    if (document.exists) {
+        const data = document.data();
+        return data ? data.value : null;
+    }
+
+    return null;
+}
+
 exports.publishNewArticles = onDocumentCreated("articles/{docId}", async (event) => {
     const snapshot = event.data;
 
@@ -52,9 +68,9 @@ exports.publishNewArticles = onDocumentCreated("articles/{docId}", async (event)
             if (workspace.exists) {
                 const workspaceData = workspace.data() as AcceptedWorkspace;
                 const workspaceToken = workspaceData.accessToken;
-                const workspaceLanguage = workspaceData.settings.language.value;
-                const workspaceChannel: string = workspaceData.settings.channel.value;
-                const workspaceKeywords: string[] = workspaceData.settings.keywords.value;
+                const workspaceLanguage = await getSettingValue(workspace.id, "language");
+                const workspaceChannel: string = await getSettingValue(workspace.id, "channel");
+                const workspaceKeywords: string[] = await getSettingValue(workspace.id, "keywords");
 
                 const message = await formatMessage(
                     article,
@@ -72,6 +88,15 @@ exports.publishNewArticles = onDocumentCreated("articles/{docId}", async (event)
     }
 })
 
+async function setField(documentId: string, field: string, value: string | string[] | boolean) {
+    return db
+    .collection("acceptedWorkspaces")
+    .doc(documentId)
+    .collection("settings")
+    .doc(field)
+    .set({value: value}, {merge: true});
+}
+
 exports.authorizeWorkspace = onDocumentCreated("pendingWorkspaces/{docId}", async (event) => {
     const snapshot = event.data;
 
@@ -86,20 +111,6 @@ exports.authorizeWorkspace = onDocumentCreated("pendingWorkspaces/{docId}", asyn
     const workspaceData: AcceptedWorkspace = {
         name: pendingWorkspace.name,
         accessToken: pendingWorkspace.accessToken,
-        settings: {
-            channel: {
-                value: pendingWorkspace.channel
-            },
-            language: {
-                value: pendingWorkspace.language
-            },
-            keywords: {
-                value: pendingWorkspace.keywords
-            },
-            live: {
-                value: false,
-            }
-        },
         premium: false,
         freeTrialStartDate: Timestamp.now(),
         freeTrialEndDate: Timestamp.fromDate(freeTrialEndDate),
@@ -110,6 +121,11 @@ exports.authorizeWorkspace = onDocumentCreated("pendingWorkspaces/{docId}", asyn
         .collection("acceptedWorkspaces")
         .doc(pendingWorkspace.id)
         .set(workspaceData);
+
+    await setField(pendingWorkspace.id, "language", pendingWorkspace.language);
+    await setField(pendingWorkspace.id, "channel", pendingWorkspace.channel);
+    await setField(pendingWorkspace.id, "keywords", pendingWorkspace.keywords);
+    await setField(pendingWorkspace.id, "live", false);
 
     const workspaceId: WorkspaceId = {
         id: pendingWorkspace.id
