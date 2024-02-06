@@ -14,7 +14,7 @@ export default function Scopes() {
             </div>
             <label>chat:write.public</label>
             <div className={styles.subtitle} style={{margin: "10px 0 30px 0"}}>
-                Send messages to channels @{APP_NAME} isn't a member of
+                Send messages to channels @{APP_NAME} isn&apos;t a member of
             </div>
             <label>command</label>
             <div className={styles.subtitle} style={{margin: "10px 0 30px 0"}}>
