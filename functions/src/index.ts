@@ -182,19 +182,19 @@ exports.setLanguage = onRequest(
         if (!language){
             // Format error message
             content = `It seems you did not provide an input language :confused:`
-            hint = `:bulb: _You can change the default language by typing \`/setlanguage <language>\`_`
+            hint = `:bulb: _You can change the default language with_ \`/setlanguage <language>\``
         } else if (!supportedLanguages.includes(language)) {
             // Format error message
             content = `It seems you did not provide a supported language :confused:`
-            hint = `:bulb: _Please choose a language among the following: ${supportedLanguages.join(', ')}_`
+            hint = `:bulb: _Supported languages are the following: ${supportedLanguages.join(', ')}_`
         } else {
             // Change the default display language for requesting team
             await setField(teamId, 'language', language);
 
             // Format success message
-            title = `:gear: Language set to ${language}`
+            title = `:partying_face: Language set to ${language}`
             content = `From now on, news will be displayed in *${language}* :blush:`
-            hint = `:bulb: _You can change the default language at anytime by typing \`/setlanguage <language>\` in the chat_`
+            hint = `:bulb: _You can change the default language with_ \`/setlanguage <language>\``
         }
 
         const settingMessage = formatSettingMessage(title, content, hint);
