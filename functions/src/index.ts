@@ -174,29 +174,22 @@ exports.setLanguage = onRequest(
         }
 
         // Initialize message fields
-        let title: string;
+        let title: string = `:boom: Failed to change language`;
         let content: string;
         let hint: string;
 
         // Check language presence
         if (!language){
             // Format error message
-            title = `:boom: Failed to change language`
             content = `It seems you did not provide an input language :confused:`
             hint = `:bulb: _You can change the default language by typing \`/setlanguage <language>\`_`
-
-            // Send a bad request error
-            res.status(400).send("A language is required.");
         }
 
         // Check whether input language is valid
         if (!supportedLanguages.includes(language)) {
             // Format error message
-            title = `:boom: Failed to change language`
             content = `It seems you did not provide a supported language :confused:`
             hint = `:bulb: _Please choose a language among the following: ${supportedLanguages.join(', ')}_`
-
-            res.status(400).send(`*${language}* does not belong to the supported languages :confused:`);
         }
 
         // Change the default display language for requesting team
