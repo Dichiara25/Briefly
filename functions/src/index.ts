@@ -5,7 +5,7 @@ import { fetchArticles, fetchTopics } from './articles';
 import { PendingWorkspace, AcceptedWorkspace, WorkspaceId, db, getWorkspaceToken } from './firestore';
 import { sendMessageToSlackChannel } from "./slack";
 import { daysBetweenDates, getDateIn30Days } from "./dates";
-import { formatArticleMessage, formatLanguageMessage } from "./messages";
+import { formatArticleMessage, formatSettingMessage } from "./messages";
 import { Timestamp } from "firebase-admin/firestore";
 import { Request, onRequest } from "firebase-functions/v2/https";
 import { Response } from "firebase-functions/v1";
@@ -164,31 +164,50 @@ exports.setLanguage = onRequest(
         const channelId = data['channel_id'] as string;
         const language = data['text'] as string;
 
-        // Check language and team ID fields presence
-        if (!language || !teamId){
-            res.status(400).send("A language and a team id are required.");
+        // Fetch team's access token
+        const accessToken = await getWorkspaceToken(teamId);
+
+        // Check access token existence
+        if (!accessToken) {
+            res.status(400).send("Could not fetch your team's access token.");
+            return;
+        }
+
+        // Initialize message fields
+        let title: string;
+        let content: string;
+        let hint: string;
+
+        // Check language presence
+        if (!language){
+            // Format error message
+            title = `:boom: Failed to change language`
+            content = `It seems you did not provide an input language :confused:`
+            hint = `:bulb: _You can change the default language by typing \`/setlanguage <language>\`_`
+
+            // Send a bad request error
+            res.status(400).send("A language is required.");
         }
 
         // Check whether input language is valid
         if (!supportedLanguages.includes(language)) {
+            // Format error message
+            title = `:boom: Failed to change language`
+            content = `It seems you did not provide a supported language :confused:`
+            hint = `:bulb: _Please choose a language among the following: ${supportedLanguages.join(', ')}_`
+
             res.status(400).send(`*${language}* does not belong to the supported languages :confused:`);
         }
 
         // Change the default display language for requesting team
         await setField(teamId, 'language', language);
 
-        // Fetch team's access token
-        const accessToken = await getWorkspaceToken(teamId);
+        // Format success message
+        title = `:gear: Language set to ${language}`
+        content = `From now on, news will be displayed in *${language}* :blush:`
+        hint = `:bulb: _You can change the default language at anytime by typing \`/setlanguage <language>\` in the chat_`
 
-        // Check access token presence
-        if (accessToken)
-        {
-            // Format success message
-            const successMessage = formatLanguageMessage(language);
-            await sendMessageToSlackChannel(accessToken, channelId, successMessage);
-            res.status(200).send();
-        } else {
-            res.status(400).send("Could not retrieve your team's access token.");
-        }
+        const successMessage = formatSettingMessage(title, content, hint);
+        await sendMessageToSlackChannel(accessToken, channelId, successMessage);
     }
   );

@@ -151,22 +151,18 @@ export async function formatArticleMessage(article: Article, language: string, k
     return blocks;
 }
 
-export function formatLanguageMessage(language: string): Block[] {
+export function formatSettingMessage(title: string, content: string, hint: string): Block[] {
     const blocks: Block[] = []
-
-    const title = `:gear: Language set to ${language}`
-    const languageText = `From now on, news will be displayed in *${language}* :blush:`
-    const hint = `:bulb: _You can change the default language at anytime by typing \`/setlanguage <language>\` in the chat_`
 
     const titleBlock: SimpleSection = formatTitle(title);
     const firstDividerBlock: Divider = formatDivider(0);
-    const languageBlock: SimpleSection = formatSimpleSection(languageText);
+    const contentBlock: SimpleSection = formatSimpleSection(content);
     const secondDividerBlock: Divider = formatDivider(1);
     const hintBlock: SimpleSection = formatSimpleSection(hint);
 
     blocks.push(titleBlock);
     blocks.push(firstDividerBlock);
-    blocks.push(languageBlock);
+    blocks.push(contentBlock);
     blocks.push(secondDividerBlock);
     blocks.push(hintBlock);
 
