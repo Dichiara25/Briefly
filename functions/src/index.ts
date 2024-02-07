@@ -2,10 +2,10 @@ const { onSchedule } = require("firebase-functions/v2/scheduler");
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { Article, Topic } from './rss';
 import { fetchArticles, fetchTopics } from './articles';
-import { PendingWorkspace, AcceptedWorkspace, WorkspaceId, db } from './firestore';
+import { PendingWorkspace, AcceptedWorkspace, WorkspaceId, db, getWorkspaceToken } from './firestore';
 import { sendMessageToSlackChannel } from "./slack";
 import { daysBetweenDates, getDateIn30Days } from "./dates";
-import { formatMessage } from "./messages";
+import { formatArticleMessage, formatLanguageMessage } from "./messages";
 import { Timestamp } from "firebase-admin/firestore";
 import { Request, onRequest } from "firebase-functions/v2/https";
 import { Response } from "firebase-functions/v1";
@@ -79,7 +79,7 @@ exports.publishNewArticles = onDocumentCreated("articles/{docId}", async (event)
                 const workspaceChannel: string = await getSettingValue(workspace.id, "channel");
                 const workspaceKeywords: string[] = await getSettingValue(workspace.id, "keywords");
 
-                const message = await formatMessage(
+                const message = await formatArticleMessage(
                     article,
                     workspaceLanguage,
                     workspaceKeywords
@@ -119,6 +119,7 @@ exports.authorizeWorkspace = onDocumentCreated("pendingWorkspaces/{docId}", asyn
         name: pendingWorkspace.name,
         accessToken: pendingWorkspace.accessToken,
         premium: false,
+        settings: null,
         freeTrialStartDate: Timestamp.now(),
         freeTrialEndDate: Timestamp.fromDate(freeTrialEndDate),
     }
@@ -156,6 +157,7 @@ exports.setLanguage = onRequest(
     async (req: Request, res: Response) => {
         const data = await req.body;
         const teamId = data['team_id'] as string;
+        const channelId = data['channel_id'] as string;
         const language = data['text'] as string;
 
         if (!language || !teamId){
@@ -168,6 +170,15 @@ exports.setLanguage = onRequest(
 
         await setField(teamId, 'language', language);
 
-        res.status(200).send(`From now on, news will be delivered in *${language}* in your Slack organization :blush:`);
+        const accessToken = await getWorkspaceToken(teamId);
+        const successMessage = formatLanguageMessage(language);
+
+        if (accessToken)
+        {
+            await sendMessageToSlackChannel(accessToken, channelId, successMessage);
+            res.status(200).send();
+        } else {
+            res.status(400).send("Could not retrieve your team's access token.");
+        }
     }
   );

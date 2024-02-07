@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin';
-import { Timestamp } from "firebase-admin/firestore";
+import { CollectionReference, Timestamp } from "firebase-admin/firestore";
 
 require('dotenv').config();
 
@@ -25,6 +25,7 @@ export interface AcceptedWorkspace {
   accessToken: string,
   premium: boolean,
   name: string,
+  settings: CollectionReference | null,
   freeTrialStartDate: Timestamp,
   freeTrialEndDate: Timestamp,
 }
@@ -61,4 +62,15 @@ if (admin.apps.length === 0) {
 }
 
 export const db = admin.firestore();
+
+export async function getWorkspaceToken(workspaceId: string): Promise<string | null> {
+    const workspaceDocument = await db.collection('acceptedWorkspaces').doc(workspaceId).get();
+
+    if (workspaceDocument.exists) {
+        const data = workspaceDocument.data() as AcceptedWorkspace;
+        return data.accessToken;
+    }
+
+    return null;
+}
 

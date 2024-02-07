@@ -107,7 +107,7 @@ function getKeywords(keywords: string[], language: string): string {
     return `:loudspeaker: <!here> *The following keywords are mentioned*\n${keywords.join(', ')}`
 }
 
-export async function formatMessage(article: Article, language: string, keywords: string[]): Promise<Block[]> {
+export async function formatArticleMessage(article: Article, language: string, keywords: string[]): Promise<Block[]> {
     const blocks: Block[] = []
     const matchingWords: string[] = []
 
@@ -147,6 +147,28 @@ export async function formatMessage(article: Article, language: string, keywords
     blocks.push(summaryBlock);
     blocks.push(thirdDividerBlock);
     blocks.push(linkBlock);
+
+    return blocks;
+}
+
+export function formatLanguageMessage(language: string): Block[] {
+    const blocks: Block[] = []
+
+    const title = `:gear: Language set to ${language}`
+    const languageText = `From now on, news will be displayed in *${language}* :blush:`
+    const hint = `:bulb: _You can change the default language at anytime by typing \`/setlanguage <language>\` in the chat_`
+
+    const titleBlock: SimpleSection = formatTitle(title);
+    const firstDividerBlock: Divider = formatDivider(0);
+    const languageBlock: SimpleSection = formatSimpleSection(languageText);
+    const secondDividerBlock: Divider = formatDivider(1);
+    const hintBlock: SimpleSection = formatSimpleSection(hint);
+
+    blocks.push(titleBlock);
+    blocks.push(firstDividerBlock);
+    blocks.push(languageBlock);
+    blocks.push(secondDividerBlock);
+    blocks.push(hintBlock);
 
     return blocks;
 }
