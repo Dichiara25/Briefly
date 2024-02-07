@@ -186,16 +186,49 @@ exports.setLanguage = onRequest(
         } else if (!supportedLanguages.includes(language)) {
             // Format error message
             content = `It seems you did not provide a supported language :confused:`
-            hint = `:bulb: _Supported languages are the following: ${supportedLanguages.join(', ')}_`
+            hint = `:bulb: _Supported languages: ${supportedLanguages.join(', ')}_`
         } else {
             // Change the default display language for requesting team
             await setField(teamId, 'language', language);
 
             // Format success message
-            title = `:partying_face: Language set to ${language}`
+            title = `:partying_face: Successfully set language`
             content = `From now on, news will be displayed in *${language}* :blush:`
             hint = `:bulb: _You can change the default language with_ \`/setlanguage <language>\``
         }
+
+        const settingMessage = formatSettingMessage(title, content, hint);
+        await sendMessageToSlackChannel(accessToken, channelId, settingMessage);
+    }
+  );
+
+  exports.setChannel = onRequest(
+    { cors: ["api.slack.com"] },
+    async (req: Request, res: Response) => {
+        // Send acknowledgment to requesting Slack channel
+        res.status(200).send();
+
+        // Parse slash command request payload
+        const data = await req.body;
+        const teamId = data['team_id'] as string;
+        const channelId = data['channel_id'] as string;
+
+        // Fetch team's access token
+        const accessToken = await getWorkspaceToken(teamId);
+
+        // Check access token existence
+        if (!accessToken) {
+            res.status(400).send("Could not fetch your team's access token.");
+            return;
+        }
+
+        // Format success message
+        const title = `:partying_face: Successfully set channel`
+        const content = `From now on, news will be delivered in this channel :blush:`
+        const hint = `:bulb: _You can change the default channel with_ \`/setchannel\` _in the desired channel_`
+
+        // Change the default display language for requesting team
+        await setField(teamId, 'channel', channelId);
 
         const settingMessage = formatSettingMessage(title, content, hint);
         await sendMessageToSlackChannel(accessToken, channelId, settingMessage);
