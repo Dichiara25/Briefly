@@ -183,24 +183,21 @@ exports.setLanguage = onRequest(
             // Format error message
             content = `It seems you did not provide an input language :confused:`
             hint = `:bulb: _You can change the default language by typing \`/setlanguage <language>\`_`
-        }
-
-        // Check whether input language is valid
-        if (!supportedLanguages.includes(language)) {
+        } else if (!supportedLanguages.includes(language)) {
             // Format error message
             content = `It seems you did not provide a supported language :confused:`
             hint = `:bulb: _Please choose a language among the following: ${supportedLanguages.join(', ')}_`
+        } else {
+            // Change the default display language for requesting team
+            await setField(teamId, 'language', language);
+
+            // Format success message
+            title = `:gear: Language set to ${language}`
+            content = `From now on, news will be displayed in *${language}* :blush:`
+            hint = `:bulb: _You can change the default language at anytime by typing \`/setlanguage <language>\` in the chat_`
         }
 
-        // Change the default display language for requesting team
-        await setField(teamId, 'language', language);
-
-        // Format success message
-        title = `:gear: Language set to ${language}`
-        content = `From now on, news will be displayed in *${language}* :blush:`
-        hint = `:bulb: _You can change the default language at anytime by typing \`/setlanguage <language>\` in the chat_`
-
-        const successMessage = formatSettingMessage(title, content, hint);
-        await sendMessageToSlackChannel(accessToken, channelId, successMessage);
+        const settingMessage = formatSettingMessage(title, content, hint);
+        await sendMessageToSlackChannel(accessToken, channelId, settingMessage);
     }
   );
