@@ -228,7 +228,7 @@ exports.setLanguage = onRequest(
         const hint = `:bulb: _You can change the default channel with_ \`/setchannel\` _in the desired channel_`
 
         // Change the default display language for requesting team
-        await setField(teamId, 'channel', channelId);
+        await setField(teamId, 'channel', `#${channelId}`);
 
         const settingMessage = formatSettingMessage(title, content, hint);
         await sendMessageToSlackChannel(accessToken, channelId, settingMessage);
