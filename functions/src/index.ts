@@ -222,6 +222,13 @@ exports.setLanguage = onRequest(
             return;
         }
 
+        // Ensure channel matches an existing channel
+        if (channelId.charAt(0) !== "C") {
+            // Format error message
+            res.status(400).send(`#${channelId} does not correspond to a public channel.`);
+            return;
+        }
+
         // Format success message
         const title = `:partying_face: Successfully set channel`
         const content = `From now on, news will be delivered in this channel :blush:`
