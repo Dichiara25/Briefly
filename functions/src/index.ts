@@ -155,26 +155,36 @@ exports.authorizeWorkspace = onDocumentCreated("pendingWorkspaces/{docId}", asyn
 exports.setLanguage = onRequest(
     { cors: ["api.slack.com"] },
     async (req: Request, res: Response) => {
+        // Send acknowledgment to requesting Slack channel
+        res.status(200).send();
+
+        // Parse slash command request payload
         const data = await req.body;
         const teamId = data['team_id'] as string;
         const channelId = data['channel_id'] as string;
         const language = data['text'] as string;
 
+        // Check language and team ID fields presence
         if (!language || !teamId){
             res.status(400).send("A language and a team id are required.");
         }
 
+        // Check whether input language is valid
         if (!supportedLanguages.includes(language)) {
-            res.status(200).send(`*${language}* does not belong to the supported languages :confused:`);
+            res.status(400).send(`*${language}* does not belong to the supported languages :confused:`);
         }
 
+        // Change the default display language for requesting team
         await setField(teamId, 'language', language);
 
+        // Fetch team's access token
         const accessToken = await getWorkspaceToken(teamId);
-        const successMessage = formatLanguageMessage(language);
 
+        // Check access token presence
         if (accessToken)
         {
+            // Format success message
+            const successMessage = formatLanguageMessage(language);
             await sendMessageToSlackChannel(accessToken, channelId, successMessage);
             res.status(200).send();
         } else {
