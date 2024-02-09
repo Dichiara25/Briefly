@@ -2,7 +2,7 @@ const { onSchedule } = require("firebase-functions/v2/scheduler");
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { Article, Topic } from './rss';
 import { fetchArticles, fetchTopics } from './articles';
-import { PendingWorkspace, AcceptedWorkspace, WorkspaceId, db, getWorkspaceToken } from './firestore';
+import { PendingWorkspace, AcceptedWorkspace, WorkspaceId, db, getWorkspaceToken, setField } from './firestore';
 import { sendMessageToSlackChannel } from "./slack";
 import { daysBetweenDates, getDateIn30Days } from "./dates";
 import { formatArticleMessage, formatSettingMessage } from "./messages";
@@ -95,15 +95,6 @@ exports.publishNewArticles = onDocumentCreated("articles/{docId}", async (event)
     }
 })
 
-async function setField(documentId: string, field: string, value: string | string[] | boolean) {
-    return db
-    .collection("acceptedWorkspaces")
-    .doc(documentId)
-    .collection("settings")
-    .doc(field)
-    .set({value: value}, {merge: true});
-}
-
 exports.authorizeWorkspace = onDocumentCreated("pendingWorkspaces/{docId}", async (event) => {
     const snapshot = event.data;
 
@@ -182,7 +173,7 @@ exports.setLanguage = onRequest(
         if (!language){
             // Format error message
             content = `It seems you did not provide an input language :confused:`
-            hint = `:bulb: _You can change the default language with_ \`/setlanguage <language>\``
+            hint = `:bulb: _You can change the default language with_ \`/setlanguage language\``
         } else if (!supportedLanguages.includes(language)) {
             // Format error message
             content = `It seems you did not provide a supported language :confused:`
@@ -194,7 +185,7 @@ exports.setLanguage = onRequest(
             // Format success message
             title = `:partying_face: Successfully set language`
             content = `From now on, news will be displayed in *${language}* :blush:`
-            hint = `:bulb: _You can change the default language with_ \`/setlanguage <language>\``
+            hint = `:bulb: _You can change the default language with_ \`/setlanguage language>\``
         }
 
         const settingMessage = formatSettingMessage(title, content, hint);
@@ -272,7 +263,7 @@ exports.setDelivery = onRequest(
         if (!deliveryMode){
             // Format error message
             content = `It seems you did not provide a delivery mode :confused:`
-            hint = `:bulb: _You can change the default delivery mode with_ \`/setdelivery <delivery_mode>\``
+            hint = `:bulb: _You can change the default delivery mode with_ \`/setdelivery delivery_mode\``
         } else if (deliveryMode !== "live" && deliveryMode !== "packed") {
             // Format error message
             content = `It seems you did not provide a supported delivery mode :confused:`
@@ -284,7 +275,60 @@ exports.setDelivery = onRequest(
             // Format success message
             title = `:partying_face: Successfully set delivery mode`
             content = `From now on, news will be displayed in *${deliveryMode === "live" ? "one by one in real time" : "packs once a day"}* :blush:`
-            hint = `:bulb: _You can change the default delivery mode with_ \`/setdelivery <delivery_mode>\``
+            hint = `:bulb: _You can change the default delivery mode with_ \`/setdelivery delivery_mode\``
+        }
+
+        const settingMessage = formatSettingMessage(title, content, hint);
+        await sendMessageToSlackChannel(accessToken, channelId, settingMessage);
+    }
+);
+
+exports.setDailyLimit = onRequest(
+    { cors: ["api.slack.com"] },
+    async (req: Request, res: Response) => {
+        // Send acknowledgment to requesting Slack channel
+        res.status(200).send();
+
+        // Parse slash command request payload
+        const data = await req.body;
+        const teamId = data['team_id'] as string;
+        const channelId = data['channel_id'] as string;
+        const dailyLimit = data['text'] as string;
+
+        // Fetch team's access token
+        const accessToken = await getWorkspaceToken(teamId);
+
+        // Check access token existence
+        if (!accessToken) {
+            res.status(400).send("Could not fetch your team's access token.");
+            return;
+        }
+
+        // Initialize message fields
+        let title: string = `:boom: Failed to change daily limit`;
+        let content: string;
+        let hint: string;
+
+        // Check language presence
+        if (!dailyLimit){
+            // Format error message
+            content = `It seems you did not provide a daily limit :confused:`
+            hint = `:bulb: _You can change the default daily limit with_ \`/setlimit daily_limit\``
+        } else if (!isLimitValid(dailyLimit)) {
+            // Format error message
+            content = `It seems you did not provide a valid daily limit :confused:`
+            hint = `:bulb: _The daily limit must be a positive integer._`
+        } else {
+            // Cast daily limit to number
+            const castedDailyLimit: number = parseInt(dailyLimit);
+
+            // Change the default display language for requesting team
+            await setField(teamId, 'limit', castedDailyLimit);
+
+            // Format success message
+            title = `:partying_face: Successfully set daily limit`
+            content = `From now on, you will not receive more than *${dailyLimit}* news a day :blush:`
+            hint = `:bulb: _You can change the default daily limit with_ \`/setlimit daily_limit\``
         }
 
         const settingMessage = formatSettingMessage(title, content, hint);

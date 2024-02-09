@@ -74,3 +74,11 @@ export async function getWorkspaceToken(workspaceId: string): Promise<string | n
     return null;
 }
 
+export async function setField(documentId: string, field: string, value: string | string[] | boolean | number) {
+    return db
+    .collection("acceptedWorkspaces")
+    .doc(documentId)
+    .collection("settings")
+    .doc(field)
+    .set({value: value}, {merge: true});
+}
