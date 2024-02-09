@@ -202,7 +202,7 @@ exports.setLanguage = onRequest(
     }
   );
 
-  exports.setChannel = onRequest(
+exports.setChannel = onRequest(
     { cors: ["api.slack.com"] },
     async (req: Request, res: Response) => {
         // Send acknowledgment to requesting Slack channel
@@ -240,4 +240,54 @@ exports.setLanguage = onRequest(
         const settingMessage = formatSettingMessage(title, content, hint);
         await sendMessageToSlackChannel(accessToken, channelId, settingMessage);
     }
-  );
+);
+
+exports.setDelivery = onRequest(
+    { cors: ["api.slack.com"] },
+    async (req: Request, res: Response) => {
+        // Send acknowledgment to requesting Slack channel
+        res.status(200).send();
+
+        // Parse slash command request payload
+        const data = await req.body;
+        const teamId = data['team_id'] as string;
+        const channelId = data['channel_id'] as string;
+        const deliveryMode = data['text'] as string;
+
+        // Fetch team's access token
+        const accessToken = await getWorkspaceToken(teamId);
+
+        // Check access token existence
+        if (!accessToken) {
+            res.status(400).send("Could not fetch your team's access token.");
+            return;
+        }
+
+        // Initialize message fields
+        let title: string = `:boom: Failed to change delivery mode`;
+        let content: string;
+        let hint: string;
+
+        // Check language presence
+        if (!deliveryMode){
+            // Format error message
+            content = `It seems you did not provide a delivery mode :confused:`
+            hint = `:bulb: _You can change the default delivery mode with_ \`/setdelivery <delivery_mode>\``
+        } else if (deliveryMode !== "live" && deliveryMode !== "packed") {
+            // Format error message
+            content = `It seems you did not provide a supported delivery mode :confused:`
+            hint = `:bulb: _Supported delivery modes: *live* and *packed*_`
+        } else {
+            // Change the default display language for requesting team
+            await setField(teamId, 'live', deliveryMode === "live");
+
+            // Format success message
+            title = `:partying_face: Successfully set delivery mode`
+            content = `From now on, news will be displayed in *${deliveryMode === "live" ? "one by one in real time" : "packs once a day"}* :blush:`
+            hint = `:bulb: _You can change the default delivery mode with_ \`/setdelivery <delivery_mode>\``
+        }
+
+        const settingMessage = formatSettingMessage(title, content, hint);
+        await sendMessageToSlackChannel(accessToken, channelId, settingMessage);
+    }
+);
