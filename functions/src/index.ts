@@ -177,7 +177,38 @@ exports.setLanguage = onRequest(
         const settingMessage = formatSettingMessage(title, content, hint);
         await sendMessageToSlackChannel(accessToken, channelId, settingMessage);
     }
-  );
+);
+
+exports.getLanguage = onRequest(
+    { cors: ["api.slack.com"] },
+    async (req: Request, res: Response) => {
+        // Send acknowledgment to requesting Slack channel
+        res.status(200).send();
+
+        // Parse slash command request payload
+        const data = await req.body;
+        const teamId = data['team_id'] as string;
+        const channelId = data['channel_id'] as string;
+        const language: string = await getSettingValue(teamId, "language");
+
+        // Fetch team's access token
+        const accessToken = await getWorkspaceToken(teamId);
+
+        // Check access token existence
+        if (!accessToken) {
+            res.status(400).send("Could not fetch your team's access token.");
+            return;
+        }
+
+        // Format success message
+        const title = `:gear: Language`
+        const content = `Language is currently set to *${language}* :blush:`
+        const hint = `:bulb: _You can change the default language with_ \`/setlanguage language\` _(eg. \`/setlanguage french\` for french translation)_`
+
+        const settingMessage = formatSettingMessage(title, content, hint);
+        await sendMessageToSlackChannel(accessToken, channelId, settingMessage);
+    }
+);
 
 exports.setChannel = onRequest(
     { cors: ["api.slack.com"] },
