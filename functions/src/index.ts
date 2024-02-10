@@ -173,8 +173,8 @@ exports.setLanguage = onRequest(
         if (!language){
             // Format error message
             content = `It seems you did not provide an input language :confused:`
-            hint = `:bulb: _You can change the default language with_ \`/setlanguage language\``
-        } else if (!supportedLanguages.includes(language)) {
+            hint = `:bulb: _You can change the default language with_ \`/setlanguage language\` _(eg. \`/setlanguage french\` for french translation)_`
+        } else if (!supportedLanguages.includes(language.toLowerCase())) {
             // Format error message
             content = `It seems you did not provide a supported language :confused:`
             hint = `:bulb: _Supported languages: ${supportedLanguages.join(', ')}_`
@@ -185,7 +185,7 @@ exports.setLanguage = onRequest(
             // Format success message
             title = `:partying_face: Successfully set language`
             content = `From now on, news will be displayed in *${language}* :blush:`
-            hint = `:bulb: _You can change the default language with_ \`/setlanguage language>\``
+            hint = `:bulb: _You can change the default language with_ \`/setlanguage language\` _(eg. \`/setlanguage french\` for french translation)_`
         }
 
         const settingMessage = formatSettingMessage(title, content, hint);
@@ -263,7 +263,7 @@ exports.setLiveMode = onRequest(
         if (!liveMode){
             // Format error message
             content = `It seems you did not provide the required live mode argument :confused:`
-            hint = `:bulb: _You can change the default live mode with_ \`/setlivemode live_mode\``
+            hint = `:bulb: _You can change the default live mode with_ \`/setlivemode live_mode\` _(eg. \`/setlivemode on\` for live mode)_`
         } else if (liveMode !== "on" && liveMode !== "off") {
             // Format error message
             content = `It seems you did not provide a supported live mode :confused:`
@@ -275,7 +275,7 @@ exports.setLiveMode = onRequest(
             // Format success message
             title = `:partying_face: Successfully set live mode`
             content = `From now on, news will be delivered *${liveMode === "on" ? "in real time" : "once a day"}* :blush:`
-            hint = `:bulb: _You can change the default live mode with_ \`/setlivemode live_mode\``
+            hint = `:bulb: _You can change the default live mode with_ \`/setlivemode live_mode\` _(eg. \`/setlivemode on\` for live mode)_`
         }
 
         const settingMessage = formatSettingMessage(title, content, hint);
@@ -313,7 +313,7 @@ exports.setDailyLimit = onRequest(
         if (!dailyLimit){
             // Format error message
             content = `It seems you did not provide a daily limit :confused:`
-            hint = `:bulb: _You can change the default daily limit with_ \`/setlimit daily_limit\``
+            hint = `:bulb: _You can change the default daily limit with_ \`/setlimit daily_limit\` _(eg. \`/setlimit 10\` for 10 news max per day)_`
         } else if (!isLimitValid(dailyLimit)) {
             // Format error message
             content = `It seems you did not provide a valid daily limit :confused:`
@@ -328,7 +328,7 @@ exports.setDailyLimit = onRequest(
             // Format success message
             title = `:partying_face: Successfully set daily limit`
             content = `From now on, you will not receive more than *${dailyLimit}* news a day :blush:`
-            hint = `:bulb: _You can change the default daily limit with_ \`/setlimit daily_limit\``
+            hint = `:bulb: _You can change the default daily limit with_ \`/setlimit daily_limit\` _(eg. \`/setlimit 10\` for 10 news max per day)_`
         }
 
         const settingMessage = formatSettingMessage(title, content, hint);
