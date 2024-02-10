@@ -125,6 +125,7 @@ exports.authorizeWorkspace = onDocumentCreated("pendingWorkspaces/{docId}", asyn
     await setField(pendingWorkspace.id, "channel", pendingWorkspace.channel);
     await setField(pendingWorkspace.id, "keywords", pendingWorkspace.keywords.filter(item => item !== ''));
     await setField(pendingWorkspace.id, "live", false);
+    await setField(pendingWorkspace.id, "limit", 10);
 
     const workspaceId: WorkspaceId = {
         id: pendingWorkspace.id
