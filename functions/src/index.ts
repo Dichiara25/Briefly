@@ -269,6 +269,37 @@ exports.setLiveMode = onRequest(
     }
 );
 
+exports.getLiveMode = onRequest(
+    { cors: ["api.slack.com"] },
+    async (req: Request, res: Response) => {
+        // Send acknowledgment to requesting Slack channel
+        res.status(200).send();
+
+        // Parse slash command request payload
+        const data = await req.body;
+        const teamId = data['team_id'] as string;
+        const channelId = data['channel_id'] as string;
+        const liveMode: boolean = await getSettingValue(teamId, "live");
+
+        // Fetch team's access token
+        const accessToken = await getWorkspaceToken(teamId);
+
+        // Check access token existence
+        if (!accessToken) {
+            res.status(400).send("Could not fetch your team's access token.");
+            return;
+        }
+
+        // Format success message
+        const title = `:gear: Live mode`
+        const content = `Live mode is currently *${liveMode ? "active" : "inactive"}* :blush:`
+        const hint = `:bulb: _You can change the default live mode value with_ \`/setlivemode live_mode\` _(eg. \`/setlivemode on\` for live mode)_`
+
+        const settingMessage = formatSettingMessage(title, content, hint);
+        await sendMessageToSlackChannel(accessToken, channelId, settingMessage);
+    }
+);
+
 exports.setDailyLimit = onRequest(
     { cors: ["api.slack.com"] },
     async (req: Request, res: Response) => {
