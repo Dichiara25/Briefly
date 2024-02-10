@@ -233,7 +233,7 @@ exports.setChannel = onRequest(
     }
 );
 
-exports.setMode = onRequest(
+exports.setDeliveryMode = onRequest(
     { cors: ["api.slack.com"] },
     async (req: Request, res: Response) => {
         // Send acknowledgment to requesting Slack channel
