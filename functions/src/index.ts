@@ -329,7 +329,7 @@ exports.setDailyLimit = onRequest(
 
             // Format success message
             title = `:partying_face: Successfully set daily limit`
-            content = `From now on, you will not receive more than *${dailyLimit}* news a day :blush:`
+            content = `From now on, you will receive up to *${dailyLimit}* news a day :blush:`
             hint = `:bulb: _You can change the default daily limit with_ \`/setlimit daily_limit\` _(eg. \`/setlimit 10\` for 10 news max per day)_`
         }
 
