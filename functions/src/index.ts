@@ -219,6 +219,37 @@ exports.setChannel = onRequest(
     }
 );
 
+exports.getChannel = onRequest(
+    { cors: ["api.slack.com"] },
+    async (req: Request, res: Response) => {
+        // Send acknowledgment to requesting Slack channel
+        res.status(200).send();
+
+        // Parse slash command request payload
+        const data = await req.body;
+        const teamId = data['team_id'] as string;
+        const channelId = data['channel_id'] as string;
+        const channel: string = await getSettingValue(teamId, "channel");
+
+        // Fetch team's access token
+        const accessToken = await getWorkspaceToken(teamId);
+
+        // Check access token existence
+        if (!accessToken) {
+            res.status(400).send("Could not fetch your team's access token.");
+            return;
+        }
+
+        // Format success message
+        const title = `:gear: Delivery channel`
+        const content = `Your delivery channel is currently set to *${channel}* :blush:`
+        const hint = `:bulb: _You can change the default delivery channel with_ \`/setchannel\``
+
+        const settingMessage = formatSettingMessage(title, content, hint);
+        await sendMessageToSlackChannel(accessToken, channelId, settingMessage);
+    }
+);
+
 exports.setLiveMode = onRequest(
     { cors: ["api.slack.com"] },
     async (req: Request, res: Response) => {
