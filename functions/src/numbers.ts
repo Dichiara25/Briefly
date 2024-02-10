@@ -2,7 +2,7 @@ function canBeStrictlyCastedToNumber(str: string): boolean {
     return /^-?\d+(\.\d+)?$/.test(str.trim());
 }
 
-function isLimitValid(limit: string): boolean {
+export function isLimitValid(limit: string): boolean {
     const canBeCastedToNumber = canBeStrictlyCastedToNumber(limit);
 
     if (canBeCastedToNumber) {

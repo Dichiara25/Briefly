@@ -10,6 +10,7 @@ import { Timestamp } from "firebase-admin/firestore";
 import { Request, onRequest } from "firebase-functions/v2/https";
 import { Response } from "firebase-functions/v1";
 import { supportedLanguages } from "./languages";
+import { isLimitValid } from "./numbers";
 
 exports.fetchNewArticles = onSchedule(
     {
