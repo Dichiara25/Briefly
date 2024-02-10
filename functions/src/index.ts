@@ -233,7 +233,7 @@ exports.setChannel = onRequest(
     }
 );
 
-exports.setDelivery = onRequest(
+exports.setmode = onRequest(
     { cors: ["api.slack.com"] },
     async (req: Request, res: Response) => {
         // Send acknowledgment to requesting Slack channel
@@ -263,7 +263,7 @@ exports.setDelivery = onRequest(
         if (!deliveryMode){
             // Format error message
             content = `It seems you did not provide a delivery mode :confused:`
-            hint = `:bulb: _You can change the default delivery mode with_ \`/setdelivery delivery_mode\``
+            hint = `:bulb: _You can change the default delivery mode with_ \`/setmode delivery_mode\``
         } else if (deliveryMode !== "live" && deliveryMode !== "packed") {
             // Format error message
             content = `It seems you did not provide a supported delivery mode :confused:`
@@ -275,7 +275,7 @@ exports.setDelivery = onRequest(
             // Format success message
             title = `:partying_face: Successfully set delivery mode`
             content = `From now on, news will be displayed in *${deliveryMode === "live" ? "one by one in real time" : "packs once a day"}* :blush:`
-            hint = `:bulb: _You can change the default delivery mode with_ \`/setdelivery delivery_mode\``
+            hint = `:bulb: _You can change the default delivery mode with_ \`/setmode delivery_mode\``
         }
 
         const settingMessage = formatSettingMessage(title, content, hint);
