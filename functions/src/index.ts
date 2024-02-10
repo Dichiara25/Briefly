@@ -2,7 +2,7 @@ const { onSchedule } = require("firebase-functions/v2/scheduler");
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { Article, Topic } from './rss';
 import { fetchArticles, fetchTopics } from './articles';
-import { PendingWorkspace, AcceptedWorkspace, WorkspaceId, db, getWorkspaceToken, setField } from './firestore';
+import { PendingWorkspace, AcceptedWorkspace, WorkspaceId, db, getWorkspaceToken, setField, getSettingValue } from './firestore';
 import { sendMessageToSlackChannel } from "./slack";
 import { daysBetweenDates, getDateIn30Days } from "./dates";
 import { formatArticleMessage, formatSettingMessage } from "./messages";
@@ -43,22 +43,6 @@ exports.deleteOldArticles = onSchedule("0 0 * * *", async () => {
         }
     })
 });
-
-async function getSettingValue(documentId: string, field: string): Promise<any> {
-    const document = await db
-        .collection("acceptedWorkspaces")
-        .doc(documentId)
-        .collection("settings")
-        .doc(field)
-        .get();
-
-    if (document.exists) {
-        const data = document.data();
-        return data ? data.value : null;
-    }
-
-    return null;
-}
 
 exports.publishNewArticles = onDocumentCreated("articles/{docId}", async (event) => {
     const snapshot = event.data;
@@ -332,6 +316,37 @@ exports.setDailyLimit = onRequest(
             content = `From now on, you will receive up to *${dailyLimit}* news a day :blush:`
             hint = `:bulb: _You can change the default daily limit with_ \`/setlimit daily_limit\` _(eg. \`/setlimit 10\` for 10 news max per day)_`
         }
+
+        const settingMessage = formatSettingMessage(title, content, hint);
+        await sendMessageToSlackChannel(accessToken, channelId, settingMessage);
+    }
+);
+
+exports.getDailyLimit = onRequest(
+    { cors: ["api.slack.com"] },
+    async (req: Request, res: Response) => {
+        // Send acknowledgment to requesting Slack channel
+        res.status(200).send();
+
+        // Parse slash command request payload
+        const data = await req.body;
+        const teamId = data['team_id'] as string;
+        const channelId = data['channel_id'] as string;
+        const dailyLimit: string = await getSettingValue(teamId, "limit");
+
+        // Fetch team's access token
+        const accessToken = await getWorkspaceToken(teamId);
+
+        // Check access token existence
+        if (!accessToken) {
+            res.status(400).send("Could not fetch your team's access token.");
+            return;
+        }
+
+        // Format success message
+        const title = `:gear: Daily limit`
+        const content = `Your daily limit is currently set to *${dailyLimit}* news a day :blush:`
+        const hint = `:bulb: _You can change the default daily limit with_ \`/setlimit daily_limit\` _(eg. \`/setlimit 10\` for 10 news max per day)_`
 
         const settingMessage = formatSettingMessage(title, content, hint);
         await sendMessageToSlackChannel(accessToken, channelId, settingMessage);

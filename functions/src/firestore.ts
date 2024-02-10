@@ -82,3 +82,19 @@ export async function setField(documentId: string, field: string, value: string 
     .doc(field)
     .set({value: value}, {merge: true});
 }
+
+export async function getSettingValue(documentId: string, field: string): Promise<any> {
+    const document = await db
+        .collection("acceptedWorkspaces")
+        .doc(documentId)
+        .collection("settings")
+        .doc(field)
+        .get();
+
+    if (document.exists) {
+        const data = document.data();
+        return data ? data.value : null;
+    }
+
+    return null;
+}
