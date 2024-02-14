@@ -26,6 +26,17 @@ exports.fetchNewArticles = onSchedule(
     });
 });
 
+exports.resetDeliveryCounters = onSchedule("0 0 * * *", async () => {
+    const workspaces = await db.collection("acceptedWorkspaces").get();
+
+    workspaces.forEach(async (workspace) => {
+        await db
+            .collection("acceptedWorkspaces")
+            .doc(workspace.id)
+            .set({"deliveryCounter": 0}, {merge: true});
+    })
+})
+
 exports.deleteOldArticles = onSchedule("0 0 * * *", async () => {
     const articles = await db.collection("articles").get();
     const today = new Date();
