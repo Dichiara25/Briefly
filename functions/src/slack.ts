@@ -2,7 +2,6 @@ import axios from 'axios';
 import { Block } from './messages';
 
 export async function sendMessageToSlackChannel(accessToken: string, channel: string, blocks: Block[]): Promise<void> {
-
     try {
       const response = await axios.post(
         'https://slack.com/api/chat.postMessage',

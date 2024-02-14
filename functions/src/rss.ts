@@ -33,7 +33,7 @@ export interface RssRootObject {
 export interface Topic {
     id?: string,
     feeds: string[],
-    subscribers: number
+    deliveryCounter: number
 }
 
 // Function to fetch and parse XML to JSON

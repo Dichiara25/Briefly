@@ -27,6 +27,8 @@ export async function fetchArticles(topics: Topic[]): Promise<Article[]> {
 
     const topicPromises = topics.map(async (topic: Topic) => {
       const topicId = topic.id as string;
+      const deliveryCounter = topic.deliveryCounter as number;
+      let articlesCounter = 0;
 
       const feedPromises = topic.feeds.map(async (feed) => {
         const rssObjects: RssObject[] = await fetchAndParseRssFeed(feed);
@@ -51,6 +53,13 @@ export async function fetchArticles(topics: Topic[]): Promise<Article[]> {
           };
         });
 
+      articlesCounter += articles.length;
+
+      await db
+        .collection("topics")
+        .doc(topicId)
+        .set({"deliveryCounter": deliveryCounter + articlesCounter}, {merge: true});
+
       await Promise.all(feedPromises);
     });
 
@@ -69,12 +78,12 @@ export async function fetchTopics(): Promise<Topic[]> {
         if (topicDocument.exists) {
           const topicData = topicDocument.data() as Topic;
           const topicFeeds: string[] = topicData.feeds;
-          const subscribers: number = topicData.subscribers;
+          const deliveryCounter: number = topicData.deliveryCounter;
 
           const topic: Topic = {
             id: topicDocument.id,
             feeds: topicFeeds,
-            subscribers: subscribers
+            deliveryCounter: deliveryCounter
           };
 
           topics.push(topic);

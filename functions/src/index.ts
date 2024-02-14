@@ -56,27 +56,40 @@ exports.publishNewArticles = onDocumentCreated("articles/{docId}", async (event)
     const workspaces = await db.collection("acceptedWorkspaces").get();
 
     if (!workspaces.empty) {
-        workspaces.forEach(async (workspace) => {
+        for (const workspace of workspaces.docs) {
             if (workspace.exists) {
                 const workspaceData = workspace.data() as AcceptedWorkspace;
                 const workspaceToken = workspaceData.accessToken;
                 const workspaceLanguage = await getSettingValue(workspace.id, "language");
                 const workspaceChannel: string = await getSettingValue(workspace.id, "channel");
                 const workspaceKeywords: string[] = await getSettingValue(workspace.id, "keywords");
+                const workspaceDailyLimit: number = await getSettingValue(workspace.id, "limit");
+                let workspaceDeliveryCounter = workspaceData.deliveryCounter;
 
+                // Check news limit has not been reached
+                if (workspaceDeliveryCounter == workspaceDailyLimit) break;
+
+                // Format Slack message
                 const message = await formatArticleMessage(
                     article,
                     workspaceLanguage,
                     workspaceKeywords
                 );
 
+                // Send formatted message to Slack channel
                 await sendMessageToSlackChannel(
                     workspaceToken,
                     workspaceChannel,
                     message
                 );
+
+                // Increment delivery counter
+                await db
+                    .collection("acceptedWorkspaces")
+                    .doc(workspace.id)
+                    .set({"deliveryCounter": workspaceDeliveryCounter + 1}, {merge: true});
             }
-        })
+        }
     }
 })
 
@@ -96,6 +109,7 @@ exports.authorizeWorkspace = onDocumentCreated("pendingWorkspaces/{docId}", asyn
         accessToken: pendingWorkspace.accessToken,
         premium: false,
         settings: null,
+        deliveryCounter: 0,
         freeTrialStartDate: Timestamp.now(),
         freeTrialEndDate: Timestamp.fromDate(freeTrialEndDate),
     }

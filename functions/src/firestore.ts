@@ -25,6 +25,7 @@ export interface AcceptedWorkspace {
   accessToken: string,
   premium: boolean,
   name: string,
+  deliveryCounter: number,
   settings: CollectionReference | null,
   freeTrialStartDate: Timestamp,
   freeTrialEndDate: Timestamp,
