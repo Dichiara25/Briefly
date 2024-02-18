@@ -2,7 +2,7 @@ const { onSchedule } = require("firebase-functions/v2/scheduler");
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { Article, Topic } from './rss';
 import { fetchArticles, fetchTopics } from './articles';
-import { PendingWorkspace, AcceptedWorkspace, WorkspaceId, db, getWorkspaceToken, setField, getSettingValue } from './firestore';
+import { PendingTeam, Team, TeamId, db, getWorkspaceToken, setField, getSettingValue } from './firestore';
 import { sendMessageToSlackChannel } from "./slack";
 import { daysBetweenDates, getDateIn30Days } from "./dates";
 import { formatArticleMessage, formatSettingMessage } from "./messages";
@@ -27,11 +27,11 @@ exports.fetchNewArticles = onSchedule(
 });
 
 exports.resetDeliveryCounters = onSchedule("0 0 * * *", async () => {
-    const workspaces = await db.collection("acceptedWorkspaces").get();
+    const workspaces = await db.collection("teams").get();
 
     workspaces.forEach(async (workspace) => {
         await db
-            .collection("acceptedWorkspaces")
+            .collection("teams")
             .doc(workspace.id)
             .set({"deliveryCounter": 0}, {merge: true});
     })
@@ -64,12 +64,12 @@ exports.publishNewArticles = onDocumentCreated("articles/{docId}", async (event)
     }
 
     const article = snapshot.data() as Article;
-    const workspaces = await db.collection("acceptedWorkspaces").get();
+    const workspaces = await db.collection("teams").get();
 
     if (!workspaces.empty) {
         for (const workspace of workspaces.docs) {
             if (workspace.exists) {
-                const workspaceData = workspace.data() as AcceptedWorkspace;
+                const workspaceData = workspace.data() as Team;
                 const workspaceToken = workspaceData.accessToken;
                 const workspaceLanguage = await getSettingValue(workspace.id, "language");
                 const workspaceChannel: string = await getSettingValue(workspace.id, "channel");
@@ -96,7 +96,7 @@ exports.publishNewArticles = onDocumentCreated("articles/{docId}", async (event)
 
                 // Increment delivery counter
                 await db
-                    .collection("acceptedWorkspaces")
+                    .collection("teams")
                     .doc(workspace.id)
                     .set({"deliveryCounter": workspaceDeliveryCounter + 1}, {merge: true});
             }
@@ -104,7 +104,7 @@ exports.publishNewArticles = onDocumentCreated("articles/{docId}", async (event)
     }
 })
 
-exports.authorizeWorkspace = onDocumentCreated("pendingWorkspaces/{docId}", async (event) => {
+exports.authorizeWorkspace = onDocumentCreated("pendingTeams/{docId}", async (event) => {
     const snapshot = event.data;
 
     if (!snapshot) {
@@ -112,12 +112,12 @@ exports.authorizeWorkspace = onDocumentCreated("pendingWorkspaces/{docId}", asyn
         return;
     }
 
-    const pendingWorkspace = snapshot.data() as PendingWorkspace;
+    const pendingTeam = snapshot.data() as PendingTeam;
     const freeTrialEndDate = getDateIn30Days();
 
-    const workspaceData: AcceptedWorkspace = {
-        name: pendingWorkspace.name,
-        accessToken: pendingWorkspace.accessToken,
+    const workspaceData: Team = {
+        name: pendingTeam.name,
+        accessToken: pendingTeam.accessToken,
         premium: false,
         settings: null,
         deliveryCounter: 0,
@@ -127,30 +127,30 @@ exports.authorizeWorkspace = onDocumentCreated("pendingWorkspaces/{docId}", asyn
 
     // Save sensitive workspace data in a private collection
     await db
-        .collection("acceptedWorkspaces")
-        .doc(pendingWorkspace.id)
+        .collection("teams")
+        .doc(pendingTeam.id)
         .set(workspaceData);
 
-    await setField(pendingWorkspace.id, "language", pendingWorkspace.language);
-    await setField(pendingWorkspace.id, "channel", pendingWorkspace.channel);
-    await setField(pendingWorkspace.id, "keywords", pendingWorkspace.keywords.filter(item => item !== ''));
-    await setField(pendingWorkspace.id, "live", false);
-    await setField(pendingWorkspace.id, "limit", 10);
+    await setField(pendingTeam.id, "language", pendingTeam.language);
+    await setField(pendingTeam.id, "channel", pendingTeam.channel);
+    await setField(pendingTeam.id, "keywords", pendingTeam.keywords.filter(item => item !== ''));
+    await setField(pendingTeam.id, "live", false);
+    await setField(pendingTeam.id, "limit", 10);
 
-    const workspaceId: WorkspaceId = {
-        id: pendingWorkspace.id
+    const workspaceId: TeamId = {
+        id: pendingTeam.id
     }
 
     // Save workspace ID in a public read-only collection
     await db
-        .collection("workspacesIds")
-        .doc(pendingWorkspace.id)
+        .collection("teamsIds")
+        .doc(pendingTeam.id)
         .set(workspaceId);
 
     // Delete workspace integration request
     await db
-        .collection("pendingWorkspaces")
-        .doc(pendingWorkspace.id)
+        .collection("pendingTeams")
+        .doc(pendingTeam.id)
         .delete();
 })
 

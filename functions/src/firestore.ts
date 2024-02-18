@@ -8,7 +8,7 @@ export interface Channel {
     topicIds: string[]
 }
 
-export interface PendingWorkspace {
+export interface PendingTeam {
     id: string,
     accessToken: string,
     name: string,
@@ -17,11 +17,11 @@ export interface PendingWorkspace {
     keywords: string[],
 }
 
-export interface WorkspaceId {
+export interface TeamId {
     id: string,
 }
 
-export interface AcceptedWorkspace {
+export interface Team {
   accessToken: string,
   premium: boolean,
   name: string,
@@ -65,10 +65,10 @@ if (admin.apps.length === 0) {
 export const db = admin.firestore();
 
 export async function getWorkspaceToken(workspaceId: string): Promise<string | null> {
-    const workspaceDocument = await db.collection('acceptedWorkspaces').doc(workspaceId).get();
+    const workspaceDocument = await db.collection('teams').doc(workspaceId).get();
 
     if (workspaceDocument.exists) {
-        const data = workspaceDocument.data() as AcceptedWorkspace;
+        const data = workspaceDocument.data() as Team;
         return data.accessToken;
     }
 
@@ -77,7 +77,7 @@ export async function getWorkspaceToken(workspaceId: string): Promise<string | n
 
 export async function setField(documentId: string, field: string, value: string | string[] | boolean | number) {
     return db
-    .collection("acceptedWorkspaces")
+    .collection("teams")
     .doc(documentId)
     .collection("settings")
     .doc(field)
@@ -86,7 +86,7 @@ export async function setField(documentId: string, field: string, value: string 
 
 export async function getSettingValue(documentId: string, field: string): Promise<any> {
     const document = await db
-        .collection("acceptedWorkspaces")
+        .collection("teams")
         .doc(documentId)
         .collection("settings")
         .doc(field)

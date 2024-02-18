@@ -18,7 +18,7 @@ export interface Channel {
   topicIds: string[]
 }
 
-export interface PendingWorkspace {
+export interface PendingTeam {
   id: string,
   accessToken: string,
   name: string,
@@ -69,8 +69,8 @@ export default function AccessToken(props: {availableTopics: string[]}) {
         .then(async response => {
           const responseData = response.data;
           const teamId = responseData['team']['id'];
-          const existingWorkspaceIds = await db
-            .collection('workspacesIds')
+          const existingTeamIds = await db
+            .collection('teamsIds')
             .get()
             .then((docs) => {
               if (!docs.empty) {
@@ -85,10 +85,10 @@ export default function AccessToken(props: {availableTopics: string[]}) {
               }
           })
 
-          if (!existingWorkspaceIds?.includes(teamId)) {
+          if (!existingTeamIds?.includes(teamId)) {
             setToken(responseData['access_token']);
 
-            const workspaceData: PendingWorkspace = {
+            const workspaceData: PendingTeam = {
               "id": teamId,
               "name": responseData['team']['name'],
               "accessToken": responseData['access_token'],
@@ -98,7 +98,7 @@ export default function AccessToken(props: {availableTopics: string[]}) {
             };
 
             db
-              .collection('pendingWorkspaces')
+              .collection('pendingTeams')
               .doc(teamId)
               .set(workspaceData)
               .then(() => {
