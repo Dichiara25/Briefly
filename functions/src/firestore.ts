@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin';
-import { CollectionReference, Timestamp } from "firebase-admin/firestore";
+import { Timestamp } from "firebase-admin/firestore";
 
 require('dotenv').config();
 
