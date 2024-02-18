@@ -161,7 +161,22 @@ exports.sendWelcomeMessage = onDocumentCreated("teams/{docId}", async (event) =>
         return;
     }
 
+    const team = snapshot.data() as Team;
+    const teamId = snapshot.id;
+    const accessToken = team.accessToken;
+    const channelId = await getSettingValue(teamId, "channel");
+    const endDate = team.freeTrialEndDate;
 
+    const title = "🔥 Thanks for installing Briefly"
+    const content = `Your free trial ends on \`${endDate}\``;
+    const hint = "🔗 You can subscribe to Briefly by clicking *<https://briefly.rocks/pricing|here>*."
+
+    const settingMessage = formatSettingMessage(
+        title,
+        content,
+        hint
+    );
+    await sendMessageToSlackChannel(accessToken, channelId, settingMessage);
 })
 
 exports.setLanguage = onRequest(
