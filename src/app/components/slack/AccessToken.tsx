@@ -88,7 +88,7 @@ export default function AccessToken(props: {availableTopics: string[]}) {
           if (!existingTeamIds?.includes(teamId)) {
             setToken(responseData['access_token']);
 
-            const workspaceData: PendingTeam = {
+            const teamData: PendingTeam = {
               "id": teamId,
               "name": responseData['team']['name'],
               "accessToken": responseData['access_token'],
@@ -100,7 +100,7 @@ export default function AccessToken(props: {availableTopics: string[]}) {
             db
               .collection('pendingTeams')
               .doc(teamId)
-              .set(workspaceData)
+              .set(teamData)
               .then(() => {
                 toast.success(`Thanks for installing ${APP_NAME} 🔥`);
               });

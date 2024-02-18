@@ -63,8 +63,8 @@ if (admin.apps.length === 0) {
 
 export const db = admin.firestore();
 
-export async function getWorkspaceToken(workspaceId: string): Promise<string | null> {
-    const workspaceDocument = await db.collection('teams').doc(workspaceId).get();
+export async function getAccessToken(teamId: string): Promise<string | null> {
+    const workspaceDocument = await db.collection('teams').doc(teamId).get();
 
     if (workspaceDocument.exists) {
         const data = workspaceDocument.data() as Team;

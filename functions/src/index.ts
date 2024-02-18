@@ -2,7 +2,7 @@ const { onSchedule } = require("firebase-functions/v2/scheduler");
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { Article, Topic } from './rss';
 import { fetchArticles, fetchTopics } from './articles';
-import { PendingTeam, Team, TeamId, db, getWorkspaceToken, setField, getSettingValue } from './firestore';
+import { PendingTeam, Team, TeamId, db, getAccessToken, setField, getSettingValue } from './firestore';
 import { sendMessageToSlackChannel } from "./slack";
 import { daysBetweenDates, getDateIn30Days } from "./dates";
 import { formatArticleMessage, formatSettingMessage } from "./messages";
@@ -69,13 +69,13 @@ exports.publishNewArticles = onDocumentCreated("articles/{docId}", async (event)
     if (!workspaces.empty) {
         for (const workspace of workspaces.docs) {
             if (workspace.exists) {
-                const workspaceData = workspace.data() as Team;
-                const workspaceToken = workspaceData.accessToken;
+                const teamData = workspace.data() as Team;
+                const workspaceToken = teamData.accessToken;
                 const workspaceLanguage = await getSettingValue(workspace.id, "language");
                 const workspaceChannel: string = await getSettingValue(workspace.id, "channel");
                 const workspaceKeywords: string[] = await getSettingValue(workspace.id, "keywords");
                 const workspaceDailyLimit: number = await getSettingValue(workspace.id, "limit");
-                let workspaceDeliveryCounter = workspaceData.deliveryCounter;
+                let workspaceDeliveryCounter = teamData.deliveryCounter;
 
                 // Check news limit has not been reached
                 if (workspaceDeliveryCounter == workspaceDailyLimit) break;
@@ -115,7 +115,7 @@ exports.authorizeWorkspace = onDocumentCreated("pendingTeams/{docId}", async (ev
     const pendingTeam = snapshot.data() as PendingTeam;
     const freeTrialEndDate = getDateIn30Days();
 
-    const workspaceData: Team = {
+    const teamData: Team = {
         name: pendingTeam.name,
         accessToken: pendingTeam.accessToken,
         premium: false,
@@ -128,7 +128,7 @@ exports.authorizeWorkspace = onDocumentCreated("pendingTeams/{docId}", async (ev
     await db
         .collection("teams")
         .doc(pendingTeam.id)
-        .set(workspaceData);
+        .set(teamData);
 
     await setField(pendingTeam.id, "language", pendingTeam.language);
     await setField(pendingTeam.id, "channel", pendingTeam.channel);
@@ -136,7 +136,7 @@ exports.authorizeWorkspace = onDocumentCreated("pendingTeams/{docId}", async (ev
     await setField(pendingTeam.id, "live", false);
     await setField(pendingTeam.id, "limit", 10);
 
-    const workspaceId: TeamId = {
+    const teamId: TeamId = {
         id: pendingTeam.id
     }
 
@@ -144,13 +144,24 @@ exports.authorizeWorkspace = onDocumentCreated("pendingTeams/{docId}", async (ev
     await db
         .collection("teamsIds")
         .doc(pendingTeam.id)
-        .set(workspaceId);
+        .set(teamId);
 
     // Delete workspace integration request
     await db
         .collection("pendingTeams")
         .doc(pendingTeam.id)
         .delete();
+})
+
+exports.sendWelcomeMessage = onDocumentCreated("teams/{docId}", async (event) => {
+    const snapshot = event.data;
+
+    if (!snapshot) {
+        console.log("No data associated with the event");
+        return;
+    }
+
+
 })
 
 exports.setLanguage = onRequest(
@@ -166,7 +177,7 @@ exports.setLanguage = onRequest(
         const language = data['text'] as string;
 
         // Fetch team's access token
-        const accessToken = await getWorkspaceToken(teamId);
+        const accessToken = await getAccessToken(teamId);
 
         // Check access token existence
         if (!accessToken) {
@@ -216,7 +227,7 @@ exports.getLanguage = onRequest(
         const language: string = await getSettingValue(teamId, "language");
 
         // Fetch team's access token
-        const accessToken = await getWorkspaceToken(teamId);
+        const accessToken = await getAccessToken(teamId);
 
         // Check access token existence
         if (!accessToken) {
@@ -247,7 +258,7 @@ exports.setChannel = onRequest(
         const channelName = data['channel_name'] as string;
 
         // Fetch team's access token
-        const accessToken = await getWorkspaceToken(teamId);
+        const accessToken = await getAccessToken(teamId);
 
         // Check access token existence
         if (!accessToken) {
@@ -288,7 +299,7 @@ exports.getChannel = onRequest(
         const channel: string = await getSettingValue(teamId, "channel");
 
         // Fetch team's access token
-        const accessToken = await getWorkspaceToken(teamId);
+        const accessToken = await getAccessToken(teamId);
 
         // Check access token existence
         if (!accessToken) {
@@ -319,7 +330,7 @@ exports.setLiveMode = onRequest(
         const liveMode = data['text'] as string;
 
         // Fetch team's access token
-        const accessToken = await getWorkspaceToken(teamId);
+        const accessToken = await getAccessToken(teamId);
 
         // Check access token existence
         if (!accessToken) {
@@ -369,7 +380,7 @@ exports.getLiveMode = onRequest(
         const liveMode: boolean = await getSettingValue(teamId, "live");
 
         // Fetch team's access token
-        const accessToken = await getWorkspaceToken(teamId);
+        const accessToken = await getAccessToken(teamId);
 
         // Check access token existence
         if (!accessToken) {
@@ -400,7 +411,7 @@ exports.setDailyLimit = onRequest(
         const dailyLimit = data['text'] as string;
 
         // Fetch team's access token
-        const accessToken = await getWorkspaceToken(teamId);
+        const accessToken = await getAccessToken(teamId);
 
         // Check access token existence
         if (!accessToken) {
@@ -453,7 +464,7 @@ exports.getDailyLimit = onRequest(
         const dailyLimit: string = await getSettingValue(teamId, "limit");
 
         // Fetch team's access token
-        const accessToken = await getWorkspaceToken(teamId);
+        const accessToken = await getAccessToken(teamId);
 
         // Check access token existence
         if (!accessToken) {
