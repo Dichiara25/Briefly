@@ -5,7 +5,6 @@ import { useContext } from "react"
 
 export function Brand() {
     return <a style={{display: "flex", alignItems: "center"}} href="/">
-        <div>🗞️</div>
         <div className={styles.brand}>{APP_NAME}</div>
     </a>
 }

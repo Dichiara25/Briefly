@@ -245,6 +245,7 @@ exports.setChannel = onRequest(
         const data = await req.body;
         const teamId = data['team_id'] as string;
         const channelId = data['channel_id'] as string;
+        const channelName = data['channel_name'] as string;
 
         // Fetch team's access token
         const accessToken = await getWorkspaceToken(teamId);
@@ -268,7 +269,7 @@ exports.setChannel = onRequest(
         const hint = `:bulb: _You can change the default channel with_ \`/setchannel\` _in the desired channel_`
 
         // Change the default display language for requesting team
-        await setField(teamId, 'channel', `#${channelId}`);
+        await setField(teamId, 'channel', `#${channelName}`);
 
         const settingMessage = formatSettingMessage(title, content, hint);
         await sendMessageToSlackChannel(accessToken, channelId, settingMessage);
