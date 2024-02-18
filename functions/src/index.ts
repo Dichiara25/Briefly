@@ -165,10 +165,10 @@ exports.sendWelcomeMessage = onDocumentCreated("teams/{docId}", async (event) =>
     const teamId = snapshot.id;
     const accessToken = team.accessToken;
     const channelId = await getSettingValue(teamId, "channel");
-    const endDate = team.freeTrialEndDate;
+    const endDate = team.freeTrialEndDate as Timestamp;
 
     const title = "🔥 Thanks for installing Briefly"
-    const content = `Your free trial ends on \`${endDate}\``;
+    const content = `Your free trial ends on \`${endDate.toDate()}\``;
     const hint = "🔗 You can subscribe to Briefly by clicking *<https://briefly.rocks/pricing|here>*."
 
     const settingMessage = formatSettingMessage(
