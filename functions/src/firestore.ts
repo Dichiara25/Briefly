@@ -26,7 +26,6 @@ export interface Team {
   premium: boolean,
   name: string,
   deliveryCounter: number,
-  settings: CollectionReference | null,
   freeTrialStartDate: Timestamp,
   freeTrialEndDate: Timestamp,
 }

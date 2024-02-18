@@ -119,7 +119,6 @@ exports.authorizeWorkspace = onDocumentCreated("pendingTeams/{docId}", async (ev
         name: pendingTeam.name,
         accessToken: pendingTeam.accessToken,
         premium: false,
-        settings: null,
         deliveryCounter: 0,
         freeTrialStartDate: Timestamp.now(),
         freeTrialEndDate: Timestamp.fromDate(freeTrialEndDate),
